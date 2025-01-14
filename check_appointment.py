@@ -79,25 +79,38 @@ def extract_appointment_details(html, country):
     soup = BeautifulSoup(html, 'html.parser')
     
     if country == 'italy':
+        # iData için randevu tarihlerini bul
+        available_dates = soup.find_all('td', class_='day')
         dates = []
-        available_dates = soup.find_all(['div', 'span'], string=lambda text: text and any(month in text.lower() for month in ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']))
         
         for date in available_dates:
-            date_text = date.get_text(strip=True)
-            if date_text and not any(x in date_text.lower() for x in ['randevu bulunmamaktadır', 'no appointment']):
-                dates.append(date_text)
+            if not date.get('class') or 'disabled' not in date.get('class'):
+                date_text = date.get_text(strip=True)
+                if date_text and date_text != '':
+                    dates.append(date_text)
         
         if dates:
             return [f"En yakın randevu tarihi: {dates[0]}"]
     
     elif country == 'spain':
+        # BLS için randevu tarihlerini bul
         dates = []
-        available_slots = soup.find_all(['div', 'span'], string=lambda text: text and any(month in text.lower() for month in ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']))
         
-        for slot in available_slots:
-            slot_text = slot.get_text(strip=True)
-            if slot_text and not any(x in slot_text.lower() for x in ['no slots', 'no appointment']):
-                dates.append(slot_text)
+        # Önce tarih seçim alanını bul
+        date_select = soup.find('select', {'name': 'appointment_date'})
+        if date_select:
+            available_dates = date_select.find_all('option')
+            for date in available_dates:
+                if date.get('value') and date.get('value') != '':
+                    dates.append(date.get_text(strip=True))
+        
+        # Eğer tarih seçim alanı yoksa, sayfa içindeki tarihleri ara
+        if not dates:
+            date_elements = soup.find_all(['div', 'span'], string=lambda text: text and any(month in text.lower() for month in ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık']))
+            for date in date_elements:
+                date_text = date.get_text(strip=True)
+                if date_text and not any(x in date_text.lower() for x in ['no slots', 'no appointment']):
+                    dates.append(date_text)
         
         if dates:
             return [f"En yakın randevu tarihi: {dates[0]}"]
@@ -206,8 +219,25 @@ def main():
             
             has_appointment, details = check_appointment(country, city)
             if has_appointment:
-                message = f"""
-{TerminalColors.GREEN}🎉 RANDEVU BULUNDU!{TerminalColors.RESET}
+                # Terminal için renkli mesaj
+                terminal_message = f"""
+🎉 RANDEVU BULUNDU!
+
+🌍 Ülke: {country.upper()}
+🏢 Şehir: {city.upper()}
+⏰ Kontrol Zamanı: {now}
+
+📝 Detaylar:
+{chr(10).join(f'- {detail}' for detail in details)}
+
+🔗 Site: {VISA_URLS[country][city]}
+
+⚡️ Lütfen hemen siteye giriş yapın ve randevuyu alın!
+                """
+                
+                # Telegram için renksiz mesaj
+                telegram_message = f"""
+🎉 RANDEVU BULUNDU!
 
 🌍 Ülke: {country.upper()}
 🏢 Şehir: {city.upper()}
@@ -223,9 +253,9 @@ def main():
                 
                 logger.info("Randevu bulundu! Bildirimler gönderiliyor...")
                 play_notification_sound()
-                send_telegram_message(message)
+                send_telegram_message(telegram_message)
                 
-                print("\n" + message)
+                print("\n" + terminal_message)
                 input("\nBotu kapatmak için Enter'a basın...")
                 break
             else:
