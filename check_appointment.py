@@ -17,6 +17,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Terminal renk kodları
+class TerminalColors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    RESET = '\033[0m'
+
 # URL'ler
 VISA_URLS = {
     'italy': {
@@ -175,12 +181,19 @@ def main():
     city = input("Seçiminiz (1/2): ")
     city = 'ankara' if city == '1' else 'istanbul'
     
+    # Kontrol tipi seçimi
+    print("\nKontrol tipi seçin:")
+    print("1. Sürekli kontrol")
+    print("2. Belirli aralıklarla kontrol")
+    check_type = input("Seçiminiz (1/2): ")
+    
     # Kontrol sıklığı
-    interval = int(input("\nKontrol sıklığı (dakika): "))
-    interval = max(1, interval)  # En az 1 dakika
+    interval = 1  # Varsayılan 1 saniye
+    if check_type == '2':
+        interval = int(input("\nKontrol sıklığı (dakika): ")) * 60  # Dakikayı saniyeye çevir
     
     logger.info(f"\n{country.upper()} - {city.upper()} için randevu kontrolü başlıyor...")
-    logger.info(f"Kontrol sıklığı: {interval} dakika")
+    logger.info(f"Kontrol tipi: {'Sürekli' if check_type == '1' else f'Her {interval//60} dakikada bir'}")
     print("\nBotu durdurmak için Ctrl+C tuşlarına basın")
     
     error_count = 0
@@ -194,7 +207,7 @@ def main():
             has_appointment, details = check_appointment(country, city)
             if has_appointment:
                 message = f"""
-🎉 RANDEVU BULUNDU!
+{TerminalColors.GREEN}🎉 RANDEVU BULUNDU!{TerminalColors.RESET}
 
 🌍 Ülke: {country.upper()}
 🏢 Şehir: {city.upper()}
@@ -229,12 +242,15 @@ def main():
                         time.sleep(300)
                         error_count = 0
                 else:
-                    logger.info("Randevu bulunamadı")
+                    logger.info(f"{TerminalColors.RED}❌ Randevu bulunamadı{TerminalColors.RESET}")
                     error_count = 0
             
-            next_check = datetime.now() + timedelta(minutes=interval)
-            logger.info(f"Bir sonraki kontrol: {next_check.strftime('%H:%M:%S')}")
-            time.sleep(interval * 60)
+            if check_type == '2':  # Belirli aralıklarla kontrol
+                next_check = datetime.now() + timedelta(seconds=interval)
+                logger.info(f"Bir sonraki kontrol: {next_check.strftime('%H:%M:%S')}")
+                time.sleep(interval)
+            else:  # Sürekli kontrol
+                time.sleep(1)  # 1 saniye bekle
             
     except KeyboardInterrupt:
         logger.info("\nBot durduruldu.")
