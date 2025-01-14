@@ -219,11 +219,14 @@ def main():
             
             has_appointment, details = check_appointment(country, city)
             if has_appointment:
+                # Ülke ismini Türkçe'ye çevir
+                country_tr = 'İTALYA' if country == 'italy' else 'İSPANYA'
+                
                 # Terminal için renkli mesaj
                 terminal_message = f"""
 🎉 RANDEVU BULUNDU!
 
-🌍 Ülke: {country.upper()}
+🌍 Ülke: {country_tr}
 🏢 Şehir: {city.upper()}
 ⏰ Kontrol Zamanı: {now}
 
@@ -239,7 +242,7 @@ def main():
                 telegram_message = f"""
 🎉 RANDEVU BULUNDU!
 
-🌍 Ülke: {country.upper()}
+🌍 Ülke: {country_tr}
 🏢 Şehir: {city.upper()}
 ⏰ Kontrol Zamanı: {now}
 
