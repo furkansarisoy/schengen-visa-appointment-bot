@@ -1,11 +1,16 @@
-import requests
-import time
-from datetime import datetime, timedelta
-import platform
+#!/usr/bin/env python3
+"""
+Schengen Visa Appointment Check Program
+"""
+
 import os
-from bs4 import BeautifulSoup
+import sys
 import logging
+import json
+import asyncio
+import aiohttp
 from dotenv import load_dotenv
+from telegram.ext import Application
 
 # Load environment variables
 load_dotenv()
@@ -13,281 +18,292 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
 )
+
 logger = logging.getLogger(__name__)
 
-# Terminal renk kodları
-class TerminalColors:
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    RESET = '\033[0m'
-
-# URL'ler
-VISA_URLS = {
-    'italy': {
-        'base': 'https://www.idata.com.tr/ita/tr',
-        'ankara': 'https://www.idata.com.tr/ita/tr/ankara-randevu',
-        'istanbul': 'https://www.idata.com.tr/ita/tr/istanbul-randevu'
-    },
-    'spain': {
-        'base': 'https://turkey.blsspainvisa.com',
-        'ankara': 'https://turkey.blsspainvisa.com/appointment/slots',
-        'istanbul': 'https://turkey.blsspainvisa.com/appointment/slots'
-    }
-}
-
-# Telegram configuration
+# Telegram bot setup
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-def send_telegram_message(message):
-    """Telegram üzerinden mesaj gönder"""
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        logger.warning("Telegram bildirimleri için TOKEN ve CHAT_ID gerekli!")
-        return
-    
+API_URL = "https://api.schengenvisaappointments.com/api/visa-list/?format=json"
+
+# Ülke isimleri sözlüğü
+COUNTRIES_TR = {
+    'France': 'Fransa',
+    'Germany': 'Almanya',
+    'Netherlands': 'Hollanda',
+    'Italy': 'İtalya',
+    'Spain': 'İspanya',
+    'Greece': 'Yunanistan',
+    'Belgium': 'Belçika',
+    'Austria': 'Avusturya',
+    'Denmark': 'Danimarka',
+    'Sweden': 'İsveç'
+}
+
+# Ay isimleri sözlüğü
+MONTHS_TR = {
+    1: 'Ocak',
+    2: 'Şubat',
+    3: 'Mart',
+    4: 'Nisan',
+    5: 'Mayıs',
+    6: 'Haziran',
+    7: 'Temmuz',
+    8: 'Ağustos',
+    9: 'Eylül',
+    10: 'Ekim',
+    11: 'Kasım',
+    12: 'Aralık'
+}
+
+def format_date(date_str):
+    """Tarihi formatla: YYYY-MM-DD -> DD Month YYYY"""
     try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message,
-            "parse_mode": "HTML"
-        }
-        response = requests.post(url, json=data)
-        response.raise_for_status()
-        logger.info("Telegram bildirimi gönderildi")
-    except Exception as e:
-        logger.error(f"Telegram mesajı gönderilemedi: {e}")
+        year, month, day = map(int, date_str.split('-'))
+        return f"{day} {MONTHS_TR[month]} {year}"
+    except:
+        return date_str  # Hata durumunda orijinal tarihi döndür
 
-def play_notification_sound():
-    """Sistem sesli uyarı çal"""
-    try:
-        if platform.system() == 'Darwin':  # macOS
-            os.system('afplay /System/Library/Sounds/Glass.aiff')
-        elif platform.system() == 'Windows':
-            import winsound
-            winsound.Beep(1000, 1000)
-        else:  # Linux
-            os.system('beep')
-        logger.info("Sesli bildirim çalındı")
-    except Exception as e:
-        logger.error(f"Sesli bildirim çalınamadı: {e}")
+class AppointmentChecker:
+    def __init__(self):
+        self.country = None
+        self.city = None
+        self.frequency = None
+        self.application = None
+        self.running = False
+        if TELEGRAM_BOT_TOKEN:
+            self.application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
-def extract_appointment_details(html, country):
-    """En yakın randevu tarihini bul"""
-    soup = BeautifulSoup(html, 'html.parser')
-    
-    if country == 'italy':
-        # iData için randevu tarihlerini bul
-        available_dates = soup.find_all('td', class_='day')
-        dates = []
-        
-        for date in available_dates:
-            if not date.get('class') or 'disabled' not in date.get('class'):
-                date_text = date.get_text(strip=True)
-                if date_text and date_text != '':
-                    dates.append(date_text)
-        
-        if dates:
-            return [f"En yakın randevu tarihi: {dates[0]}"]
-    
-    elif country == 'spain':
-        # BLS için randevu tarihlerini bul
-        dates = []
-        
-        # Önce tarih seçim alanını bul
-        date_select = soup.find('select', {'name': 'appointment_date'})
-        if date_select:
-            available_dates = date_select.find_all('option')
-            for date in available_dates:
-                if date.get('value') and date.get('value') != '':
-                    dates.append(date.get_text(strip=True))
-        
-        # Eğer tarih seçim alanı yoksa, sayfa içindeki tarihleri ara
-        if not dates:
-            date_elements = soup.find_all(['div', 'span'], string=lambda text: text and any(month in text.lower() for month in ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık']))
-            for date in date_elements:
-                date_text = date.get_text(strip=True)
-                if date_text and not any(x in date_text.lower() for x in ['no slots', 'no appointment']):
-                    dates.append(date_text)
-        
-        if dates:
-            return [f"En yakın randevu tarihi: {dates[0]}"]
-    
-    return ["Randevu var! Lütfen hemen siteyi kontrol edin."]
+    def set_parameters(self, country, city, frequency):
+        """Parametreleri güncelle"""
+        self.country = country
+        self.city = city
+        self.frequency = frequency
 
-def check_appointment(country, city):
-    """Randevu kontrolü yap"""
-    url = VISA_URLS[country][city]
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Referer': VISA_URLS[country]['base'],
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
-    }
-    
-    try:
-        logger.info(f"Kontrol ediliyor: {url}")
-        response = requests.get(url, headers=headers, timeout=30)
-        logger.info(f"Durum Kodu: {response.status_code}")
-        
-        html = response.text
-        html_lower = html.lower()
-        
-        # İtalya için kontrol
-        if country == 'italy':
-            if 'randevu bulunmamaktadır' not in html_lower and 'no appointment available' not in html_lower:
-                details = extract_appointment_details(html, country)
-                return True, details
-        
-        # İspanya için kontrol
-        elif country == 'spain':
-            if 'no slots available' not in html_lower and 'no appointment available' not in html_lower:
-                details = extract_appointment_details(html, country)
-                return True, details
-        
-        return False, []
-        
-    except requests.exceptions.ConnectionError:
-        error_msg = "Site bağlantısı başarısız oldu. İnternet bağlantınızı kontrol edin."
-        logger.error(error_msg)
-        return False, [error_msg]
-    except requests.exceptions.Timeout:
-        error_msg = "Site yanıt vermiyor (timeout). Daha sonra tekrar deneyin."
-        logger.error(error_msg)
-        return False, [error_msg]
-    except Exception as e:
-        error_msg = f"Beklenmeyen bir hata oluştu: {str(e)}"
-        logger.error(error_msg)
-        return False, [error_msg]
+    async def stop(self):
+        """Programı durdur"""
+        self.running = False
+        if self.application:
+            await self.application.shutdown()
 
-def main():
-    logger.info("Bot başlatılıyor...")
-    
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        logger.warning("""
-        ⚠️ Telegram bildirimleri için gerekli bilgiler eksik!
-        Lütfen .env dosyasında şu değişkenleri tanımlayın:
-        TELEGRAM_BOT_TOKEN=your_bot_token
-        TELEGRAM_CHAT_ID=your_chat_id
-        """)
-        input("Devam etmek için Enter'a basın...")
-    
-    print("\nSchengen Turist Vizesi Randevu Kontrol Botu")
-    print("------------------------------------------")
-    print("\nNot: Bu bot sadece turist vizesi randevularını kontrol eder!")
+    async def start_checking(self):
+        """Kontrolleri başlat"""
+        if self.application:
+            await self.application.initialize()
+        
+        self.running = True
+        while self.running:
+            await self.check_appointments()
+            await asyncio.sleep(self.frequency * 60)
+
+    async def send_notification(self, message):
+        """Bildirim gönder"""
+        logger.info(message)
+        
+        if self.application and TELEGRAM_CHAT_ID:
+            try:
+                await self.application.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+            except Exception as e:
+                logger.error(f"Telegram bildirimi gönderilemedi: {str(e)}")
+
+    async def check_appointments(self):
+        """API'den randevu kontrolü yap"""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(API_URL) as response:
+                    if response.status != 200:
+                        raise Exception(f"API yanıt vermedi: {response.status}")
+                    
+                    appointments = await response.json()
+                    available_appointments = []
+                    
+                    for appointment in appointments:
+                        # Randevu tarihi kontrolü
+                        appointment_date = appointment.get('appointment_date')
+                        if not appointment_date:
+                            continue  # Randevu tarihi yoksa diğer kontrollere geçme
+                        
+                        if (appointment['source_country'] == 'Turkiye' and 
+                            appointment['mission_country'].lower() == self.country.lower() and 
+                            self.city.lower() in appointment['center_name'].lower()):
+                            
+                            available_appointments.append({
+                                'country': appointment['mission_country'],
+                                'city': appointment['center_name'],
+                                'date': appointment_date,
+                                'category': appointment['visa_category'],
+                                'subcategory': appointment['visa_subcategory'],
+                                'link': appointment['book_now_link']
+                            })
+
+                    if available_appointments:
+                        # Tarihe göre sırala
+                        available_appointments.sort(key=lambda x: x['date'])
+                        
+                        for appt in available_appointments:
+                            # Ülke adını Türkçeye çevir
+                            country_tr = COUNTRIES_TR.get(appt['country'], appt['country'])
+                            # Tarihi formatla
+                            formatted_date = format_date(appt['date'])
+
+                            message = f"🎉 {country_tr} için randevu bulundu!\n\n"
+                            message += f"🏢 Merkez: {appt['city']}\n"
+                            message += f"📅 En yakın tarih: {formatted_date}\n"
+                            message += f"📋 Kategori: {appt['category']}\n"
+                            if appt['subcategory']:  # Alt kategori varsa ekle
+                                message += f"📝 Alt Kategori: {appt['subcategory']}\n"
+                            message += f"\n🔗 Randevu Linki:\n{appt['link']}"
+                            
+                            await self.send_notification(message)
+                        
+                        return True
+                    
+                    logger.info(f"Uygun randevu bulunamadı: {self.country} - {self.city}")
+                    return False
+
+        except Exception as e:
+            error_message = f"❌ API kontrolü sırasında hata: {str(e)}"
+            logger.error(error_message)
+            await self.send_notification(error_message)
+            return False
+
+def get_user_input():
+    """Kullanıcıdan giriş al"""
+    print("\nSchengen Vize Randevu Kontrol Programı")
+    print("=====================================")
     
     # Ülke seçimi
-    print("\nÜlke seçin:")
-    print("1. İtalya")
-    print("2. İspanya")
-    country = input("Seçiminiz (1/2): ")
-    country = 'italy' if country == '1' else 'spain'
+    countries = {
+        '1': 'France',
+        '2': 'Germany',
+        '3': 'Netherlands',
+        '4': 'Italy',
+        '5': 'Spain',
+        '6': 'Greece',
+        '7': 'Belgium',
+        '8': 'Austria',
+        '9': 'Denmark',
+        '10': 'Sweden'
+    }
+    
+    print("\nÜlke seçimi yapınız:")
+    for key, value in countries.items():
+        print(f"{key}. {value}")
+    
+    country_choice = input("\nSeçiminiz (1-10): ")
+    selected_country = countries.get(country_choice)
+    
+    if not selected_country:
+        raise ValueError("Geçersiz ülke seçimi!")
     
     # Şehir seçimi
-    print("\nŞehir seçin:")
-    print("1. Ankara")
-    print("2. İstanbul")
-    city = input("Seçiminiz (1/2): ")
-    city = 'ankara' if city == '1' else 'istanbul'
+    cities = {
+        '1': 'Ankara',
+        '2': 'Istanbul',
+        '3': 'Izmir',
+        '4': 'Antalya',
+        '5': 'Gaziantep',
+		'6': 'Bursa',
+		'7': 'Antalya',
+		'8': 'Edirne',
+    }
     
-    # Kontrol tipi seçimi
-    print("\nKontrol tipi seçin:")
-    print("1. Sürekli kontrol")
-    print("2. Belirli aralıklarla kontrol")
-    check_type = input("Seçiminiz (1/2): ")
+    print("\nŞehir seçimi yapınız:")
+    for key, value in cities.items():
+        print(f"{key}. {value}")
+    
+    city_choice = input("\nSeçiminiz (1-5): ")
+    selected_city = cities.get(city_choice)
+    
+    if not selected_city:
+        raise ValueError("Geçersiz şehir seçimi!")
     
     # Kontrol sıklığı
-    interval = 1  # Varsayılan 1 saniye
-    if check_type == '2':
-        interval = int(input("\nKontrol sıklığı (dakika): ")) * 60  # Dakikayı saniyeye çevir
+    print("\nKontrol sıklığı (dakika):")
+    frequency = int(input("Kaç dakikada bir kontrol edilsin? (1-60): "))
+    if frequency < 1 or frequency > 60:
+        raise ValueError("Geçersiz kontrol sıklığı! 1-60 dakika arası bir değer girin.")
     
-    logger.info(f"\n{country.upper()} - {city.upper()} için randevu kontrolü başlıyor...")
-    logger.info(f"Kontrol tipi: {'Sürekli' if check_type == '1' else f'Her {interval//60} dakikada bir'}")
-    print("\nBotu durdurmak için Ctrl+C tuşlarına basın")
-    
-    error_count = 0
-    max_errors = 3
-    
-    try:
-        while True:
-            now = datetime.now().strftime("%H:%M:%S")
-            logger.info(f"[{now}] Kontrol yapılıyor...")
+    return selected_country, selected_city, frequency
+
+async def show_menu(checker):
+    """Ana menüyü göster"""
+    while True:
+        print("\nMenü:")
+        print("1. Yeni sorgu başlat")
+        print("2. Mevcut sorguyu durdur")
+        print("3. Programdan çık")
+        
+        try:
+            choice = input("\nSeçiminiz (1-3): ")
             
-            has_appointment, details = check_appointment(country, city)
-            if has_appointment:
-                # Ülke ismini Türkçe'ye çevir
-                country_tr = 'İTALYA' if country == 'italy' else 'İSPANYA'
+            if choice == '1':
+                country, city, frequency = get_user_input()
+                checker.set_parameters(country, city, frequency)
+                print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
+                print(f"Kontrol sıklığı: {frequency} dakika")
+                print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
                 
-                # Terminal için renkli mesaj
-                terminal_message = f"""
-🎉 RANDEVU BULUNDU!
-
-🌍 Ülke: {country_tr}
-🏢 Şehir: {city.upper()}
-⏰ Kontrol Zamanı: {now}
-
-📝 Detaylar:
-{chr(10).join(f'- {detail}' for detail in details)}
-
-🔗 Site: {VISA_URLS[country][city]}
-
-⚡️ Lütfen hemen siteye giriş yapın ve randevuyu alın!
-                """
+                if checker.running:
+                    await checker.stop()
                 
-                # Telegram için renksiz mesaj
-                telegram_message = f"""
-🎉 RANDEVU BULUNDU!
-
-🌍 Ülke: {country_tr}
-🏢 Şehir: {city.upper()}
-⏰ Kontrol Zamanı: {now}
-
-📝 Detaylar:
-{chr(10).join(f'- {detail}' for detail in details)}
-
-🔗 Site: {VISA_URLS[country][city]}
-
-⚡️ Lütfen hemen siteye giriş yapın ve randevuyu alın!
-                """
-                
-                logger.info("Randevu bulundu! Bildirimler gönderiliyor...")
-                play_notification_sound()
-                send_telegram_message(telegram_message)
-                
-                print("\n" + terminal_message)
-                input("\nBotu kapatmak için Enter'a basın...")
-                break
-            else:
-                if details:  # Hata mesajı varsa
-                    logger.error("Hata oluştu!")
-                    for detail in details:
-                        logger.error(detail)
-                    error_count += 1
+                try:
+                    await checker.start_checking()
+                except asyncio.CancelledError:
+                    pass
                     
-                    if error_count >= max_errors:
-                        message = f"⚠️ Bot {error_count} kere hata aldı. 5 dakika beklenecek..."
-                        logger.warning(message)
-                        send_telegram_message(message)
-                        time.sleep(300)
-                        error_count = 0
+            elif choice == '2':
+                if checker.running:
+                    await checker.stop()
+                    print("\nSorgu durduruldu.")
                 else:
-                    logger.info(f"{TerminalColors.RED}❌ Randevu bulunamadı{TerminalColors.RESET}")
-                    error_count = 0
-            
-            if check_type == '2':  # Belirli aralıklarla kontrol
-                next_check = datetime.now() + timedelta(seconds=interval)
-                logger.info(f"Bir sonraki kontrol: {next_check.strftime('%H:%M:%S')}")
-                time.sleep(interval)
-            else:  # Sürekli kontrol
-                time.sleep(1)  # 1 saniye bekle
-            
-    except KeyboardInterrupt:
-        logger.info("\nBot durduruldu.")
-        logger.info("İyi günler!")
+                    print("\nAktif sorgu bulunmuyor.")
+                    
+            elif choice == '3':
+                if checker.running:
+                    await checker.stop()
+                print("\nProgram sonlandırılıyor...")
+                sys.exit(0)
+            else:
+                print("\nGeçersiz seçim!")
+                
+        except KeyboardInterrupt:
+            if checker.running:
+                await checker.stop()
+            continue
+        except ValueError as e:
+            print(f"\nHata: {str(e)}")
+
+async def main():
+    """Ana program"""
+    try:
+        checker = AppointmentChecker()
+        
+        # İlk sorguyu al ve başlat
+        country, city, frequency = get_user_input()
+        checker.set_parameters(country, city, frequency)
+        print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
+        print(f"Kontrol sıklığı: {frequency} dakika")
+        print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
+        
+        try:
+            await checker.start_checking()
+        except KeyboardInterrupt:
+            await show_menu(checker)
+        
+    except ValueError as e:
+        print(f"\nHata: {str(e)}")
+    except Exception as e:
+        print(f"\nBeklenmeyen hata: {str(e)}")
 
 if __name__ == "__main__":
-    main() 
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nProgram sonlandırıldı.") 
