@@ -1,64 +1,100 @@
-# Schengen Vize Randevu Kontrol Botu
+# Schengen Vize Randevu Kontrol Programı 🔍
 
-Bu bot, İtalya ve İspanya Schengen vizesi için randevu kontrolü yapar. Bot özellikle turist vizesi randevularını kontrol eder.
+Bu program, Schengen vizesi için randevu kontrolü yapmanızı sağlar. Program belirttiğiniz ülke ve şehir için düzenli olarak randevu kontrolü yapar ve uygun randevu bulunduğunda Telegram üzerinden bildirim gönderir.
 
-## Özellikler
+## Özellikler ✨
 
-- İtalya (iData) ve İspanya (BLS) vize sistemlerini kontrol eder
-- Ankara ve İstanbul şehirleri için randevu kontrolü yapar
-- Sesli ve görsel bildirimler
-- Otomatik hata yönetimi ve yeniden deneme
-- Özelleştirilebilir kontrol sıklığı
+- 10 Schengen ülkesi için randevu kontrolü
+- Türkiye'deki tüm VFS Global merkezleri desteklenir
+- Telegram üzerinden anlık bildirimler
+- Kullanıcı dostu menü arayüzü
+- Otomatik randevu kontrolü
+- Tarih bazlı sıralama ve Türkçe tarih formatı
 
-## Gereksinimler
+## Kurulum 🛠️
 
+1. Python 3.8 veya üzeri sürümü yükleyin
+2. Gerekli paketleri yükleyin:
 ```bash
-Python 3.x
-requests
-beautifulsoup4
+pip install python-telegram-bot python-dotenv aiohttp
 ```
 
-## Kurulum
-
-1. Repo'yu klonlayın:
-```bash
-git clone https://github.com/KULLANICI_ADI/schengen-visa-appointment-bot.git
-cd schengen-visa-appointment-bot
+3. `.env` dosyası oluşturun ve Telegram bot bilgilerinizi ekleyin:
+```
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
 ```
 
-2. Virtual environment oluşturun:
+## Kullanım 📱
+
+1. Programı başlatın:
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # Linux/macOS
-# veya
-.\venv\Scripts\activate  # Windows
+python check_appointment.py
 ```
 
-3. Gerekli paketleri yükleyin:
-```bash
-pip install -r requirements.txt
-```
+2. Ülke seçimi yapın (1-10):
+   - Fransa
+   - Almanya
+   - Hollanda
+   - İtalya
+   - İspanya
+   - Yunanistan
+   - Belçika
+   - Avusturya
+   - Danimarka
+   - İsveç
 
-## Kullanım
+3. Şehir seçimi yapın:
+   - Ankara
+   - Istanbul
+   - Izmir
+   - Antalya
+   - Gaziantep
+   - Bursa
+   - Edirne
 
-1. Botu çalıştırın:
-```bash
-python3 check_appointment.py
-```
+4. Kontrol sıklığını belirleyin (1-60 dakika)
 
-2. İstenilen bilgileri girin:
-   - Ülke seçin (İtalya/İspanya)
-   - Şehir seçin (Ankara/İstanbul)
-   - Kontrol sıklığını dakika olarak girin
+## Menü Seçenekleri 📋
 
-3. Bot çalışmaya başlayacak ve randevu bulduğunda sizi bilgilendirecektir.
+- **Yeni sorgu başlat**: Yeni ülke ve şehir için randevu kontrolü başlatır
+- **Mevcut sorguyu durdur**: Aktif sorguyu durdurur
+- **Programdan çık**: Programı sonlandırır
 
-## Notlar
+## Bildirimler 📬
 
-- Bot randevu bulduğunda sesli uyarı verecektir
-- Ctrl+C ile botu durdurabilirsiniz
-- Çok fazla hata alındığında bot otomatik olarak 5 dakika bekleyecektir
+Program randevu bulduğunda Telegram üzerinden aşağıdaki bilgileri içeren bir bildirim gönderir:
+- Ülke adı (Türkçe)
+- Merkez bilgisi
+- En yakın randevu tarihi (örn: 7 Şubat 2025)
+- Vize kategorisi
+- Alt kategori (varsa)
+- Randevu linki
 
-## Lisans
+## Kısayollar ⌨️
 
-MIT License 
+- **Ctrl+C**: Menüye dönmek için
+- **3**: Programdan çıkmak için
+
+## Notlar 📝
+
+- Program her kontrol sonrası belirlediğiniz süre kadar bekler
+- Randevular tarih sırasına göre listelenir
+- Telegram bildirimleri için bot token ve chat ID gereklidir
+- Program kesintisiz çalışabilir, istediğiniz zaman menüden kontrol edebilirsiniz
+
+## Hata Durumları ⚠️
+
+Program aşağıdaki durumlarda sizi bilgilendirir:
+- API bağlantı hataları
+- Geçersiz ülke/şehir seçimleri
+- Telegram bildirim hataları
+- Diğer beklenmeyen hatalar
+
+## Katkıda Bulunma 🤝
+
+1. Bu depoyu fork edin
+2. Yeni bir branch oluşturun (`git checkout -b feature/amazing`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik eklendi'`)
+4. Branch'inizi push edin (`git push origin feature/amazing`)
+5. Pull Request oluşturun 
