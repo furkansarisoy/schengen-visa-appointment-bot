@@ -101,7 +101,7 @@ python check_appointment.py
 Program randevu bulduğunda Telegram üzerinden aşağıdaki bilgileri içeren bir bildirim gönderir:
 - Ülke adı (Türkçe)
 - Merkez bilgisi
-- En yakın randevu tarihi (örn: 7 Şubat 2025)
+- Randevu tarihi (örn: 7 Şubat 2025)
 - Vize kategorisi
 - Alt kategori (varsa)
 - Randevu linki

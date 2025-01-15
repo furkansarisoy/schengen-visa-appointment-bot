@@ -167,7 +167,7 @@ class AppointmentChecker:
 
                             message = f"🎉 {country_tr} için randevu bulundu!\n\n"
                             message += f"🏢 Merkez: {appt['city']}\n"
-                            message += f"📅 En yakın tarih: {formatted_date}\n"
+                            message += f"📅 Tarih: {formatted_date}\n"
                             message += f"📋 Kategori: {appt['category']}\n"
                             if appt['subcategory']:  # Alt kategori varsa ekle
                                 message += f"📝 Alt Kategori: {appt['subcategory']}\n"
