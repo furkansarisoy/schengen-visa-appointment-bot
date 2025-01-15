@@ -19,11 +19,46 @@ Bu program, Schengen vizesi için randevu kontrolü yapmanızı sağlar. Program
 pip install python-telegram-bot python-dotenv aiohttp
 ```
 
-3. `.env` dosyası oluşturun ve Telegram bot bilgilerinizi ekleyin:
-```
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
-```
+3. Telegram Bot Kurulumu:
+   1. Telegram'da [@BotFather](https://t.me/BotFather) ile yeni bir sohbet başlatın
+   2. `/newbot` komutunu gönderin
+   3. Bot için bir isim girin (örn: "Schengen Randevu Bot")
+   4. Bot için bir kullanıcı adı girin (örn: "schengen_randevu_bot")
+   5. BotFather size bir API token verecek (örn: "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")
+   6. Bu token'ı güvenli bir yerde saklayın
+
+4. Chat ID Alma:
+   1. Oluşturduğunuz bot ile bir sohbet başlatın
+   2. Bota herhangi bir mesaj gönderin
+   3. Tarayıcınızda şu adrese gidin:
+      ```
+      https://api.telegram.org/bot<YourBOTToken>/getUpdates
+      ```
+      (YourBOTToken yerine BotFather'dan aldığınız token'ı yazın)
+   4. Açılan sayfada "chat" altındaki "id" değerini bulun ve not alın
+
+5. `.env` Dosyası Oluşturma:
+   1. Proje klasöründe `.env` adında bir dosya oluşturun
+   2. Dosyaya şu bilgileri ekleyin:
+      ```
+      TELEGRAM_BOT_TOKEN=your_bot_token
+      TELEGRAM_CHAT_ID=your_chat_id
+      ```
+   3. `your_bot_token` yerine BotFather'dan aldığınız token'ı yazın
+   4. `your_chat_id` yerine bir önceki adımda aldığınız Chat ID'yi yazın
+
+6. Bot'u Test Etme:
+   1. Programı çalıştırın:
+      ```bash
+      python check_appointment.py
+      ```
+   2. Program başladığında botunuzdan test mesajı almalısınız
+   3. Randevu bulunduğunda bot size otomatik olarak bildirim gönderecektir
+
+Not: Telegram botunuzun gizliliğini korumak için:
+- `.env` dosyasını asla GitHub'a yüklemeyin
+- Bot token'ınızı kimseyle paylaşmayın
+- Botunuzu sadece kendi kullanımınız için ayarlayın
 
 ## Kullanım 📱
 
