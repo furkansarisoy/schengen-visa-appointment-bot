@@ -77,6 +77,7 @@ class AppointmentChecker:
         self.frequency = None
         self.application = None
         self.running = False
+        self.task = None
         if TELEGRAM_BOT_TOKEN:
             self.application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
@@ -89,6 +90,12 @@ class AppointmentChecker:
     async def stop(self):
         """Programı durdur"""
         self.running = False
+        if self.task:
+            self.task.cancel()
+            try:
+                await self.task
+            except asyncio.CancelledError:
+                pass
         if self.application:
             await self.application.shutdown()
 
@@ -99,8 +106,14 @@ class AppointmentChecker:
         
         self.running = True
         while self.running:
-            await self.check_appointments()
-            await asyncio.sleep(self.frequency * 60)
+            try:
+                await self.check_appointments()
+                await asyncio.sleep(self.frequency * 60)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Kontrol sırasında hata: {str(e)}")
+                await asyncio.sleep(5)  # Hata durumunda 5 saniye bekle
 
     async def send_notification(self, message):
         """Bildirim gönder"""
@@ -235,28 +248,25 @@ def get_user_input():
 async def show_menu(checker):
     """Ana menüyü göster"""
     while True:
-        print("\nMenü:")
-        print("1. Yeni sorgu başlat")
-        print("2. Mevcut sorguyu durdur")
-        print("3. Programdan çık")
-        
         try:
+            print("\nMenü:")
+            print("1. Yeni sorgu başlat")
+            print("2. Mevcut sorguyu durdur")
+            print("3. Programdan çık")
+            
             choice = input("\nSeçiminiz (1-3): ")
             
             if choice == '1':
+                if checker.running:
+                    await checker.stop()
+                
                 country, city, frequency = get_user_input()
                 checker.set_parameters(country, city, frequency)
                 print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
                 print(f"Kontrol sıklığı: {frequency} dakika")
                 print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
                 
-                if checker.running:
-                    await checker.stop()
-                
-                try:
-                    await checker.start_checking()
-                except asyncio.CancelledError:
-                    pass
+                return  # Menüden çık ve ana döngüye dön
                     
             elif choice == '2':
                 if checker.running:
@@ -274,36 +284,51 @@ async def show_menu(checker):
                 print("\nGeçersiz seçim!")
                 
         except KeyboardInterrupt:
-            if checker.running:
-                await checker.stop()
-            continue
+            print("\nMenüden çıkılıyor...")
+            return  # Menüden çık ve ana döngüye dön
         except ValueError as e:
             print(f"\nHata: {str(e)}")
 
 async def main():
     """Ana program"""
-    try:
-        checker = AppointmentChecker()
-        
-        # İlk sorguyu al ve başlat
-        country, city, frequency = get_user_input()
-        checker.set_parameters(country, city, frequency)
-        print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
-        print(f"Kontrol sıklığı: {frequency} dakika")
-        print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
-        
+    checker = AppointmentChecker()
+    
+    while True:
         try:
-            await checker.start_checking()
+            # İlk sorguyu al ve başlat
+            country, city, frequency = get_user_input()
+            checker.set_parameters(country, city, frequency)
+            print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
+            print(f"Kontrol sıklığı: {frequency} dakika")
+            print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
+            
+            checker.task = asyncio.create_task(checker.start_checking())
+            try:
+                await checker.task
+            except asyncio.CancelledError:
+                pass
+            
         except KeyboardInterrupt:
-            await show_menu(checker)
-        
-    except ValueError as e:
-        print(f"\nHata: {str(e)}")
-    except Exception as e:
-        print(f"\nBeklenmeyen hata: {str(e)}")
+            print("\nMenüye dönülüyor...")
+            if checker.running:
+                await checker.stop()
+            try:
+                await show_menu(checker)
+            except Exception as e:
+                print(f"\nMenü gösterilirken hata oluştu: {str(e)}")
+        except ValueError as e:
+            print(f"\nHata: {str(e)}")
+            continue
+        except Exception as e:
+            print(f"\nBeklenmeyen hata: {str(e)}")
+            if checker.running:
+                await checker.stop()
+            continue
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nProgram sonlandırıldı.") 
+        print("\nProgram sonlandırıldı.")
+    except Exception as e:
+        print(f"\nKritik hata: {str(e)}") 
