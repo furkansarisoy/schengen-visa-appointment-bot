@@ -52,8 +52,7 @@ pip install python-telegram-bot python-dotenv aiohttp
       ```bash
       python check_appointment.py
       ```
-   2. Program başladığında botunuzdan test mesajı almalısınız
-   3. Randevu bulunduğunda bot size otomatik olarak bildirim gönderecektir
+   2. Randevu bulunduğunda bot size otomatik olarak bildirim gönderecektir
 
 Not: Telegram botunuzun gizliliğini korumak için:
 - `.env` dosyasını asla GitHub'a yüklemeyin
