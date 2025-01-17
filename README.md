@@ -11,6 +11,15 @@ Bu program, Schengen vizesi için randevu kontrolü yapmanızı sağlar. Program
 - Otomatik randevu kontrolü
 - Tarih bazlı sıralama ve Türkçe tarih formatı
 
+## Güvenlik Uyarıları ⚠️
+
+1. `.env` dosyası asla GitHub'a yüklenmemeli
+2. Bot token'ınızı asla public yapmamalısınız
+3. Eğer token'ınız yanlışlıkla public olduysa:
+   - Hemen @BotFather'dan `/revoke` komutu ile iptal edin
+   - Yeni bir bot token alın
+   - `.env` dosyasını güncelleyin
+
 ## Kurulum 🛠️
 
 1. Python 3.8 veya üzeri sürümü yükleyin
