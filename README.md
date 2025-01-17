@@ -4,7 +4,25 @@ Bu program, Schengen vizesi için randevu kontrolü yapmanızı sağlar. Program
 
 ## Özellikler ✨
 
-- 10 Schengen ülkesi için randevu kontrolü
+- 17 Avrupa ülkesi için randevu kontrolü:
+  - Fransa 🇫🇷
+  - Hollanda 🇳🇱
+  - İrlanda 🇮🇪
+  - Malta 🇲🇹
+  - İsveç 🇸🇪
+  - Çekya 🇨🇿
+  - Hırvatistan 🇭🇷
+  - Bulgaristan 🇧🇬
+  - Finlandiya 🇫🇮
+  - Slovenya 🇸🇮
+  - Danimarka 🇩🇰
+  - Norveç 🇳🇴
+  - Estonya 🇪🇪
+  - Litvanya 🇱🇹
+  - Lüksemburg 🇱🇺
+  - Ukrayna 🇺🇦
+  - Letonya 🇱🇻
+
 - Türkiye'deki tüm VFS Global merkezleri desteklenir
 - Telegram üzerinden anlık bildirimler
 - Kullanıcı dostu menü arayüzü
@@ -75,17 +93,24 @@ Not: Telegram botunuzun gizliliğini korumak için:
 python check_appointment.py
 ```
 
-2. Ülke seçimi yapın (1-10):
+2. Ülke seçimi yapın (1-17):
    - Fransa
-   - Almanya
    - Hollanda
-   - İtalya
-   - İspanya
-   - Yunanistan
-   - Belçika
-   - Avusturya
-   - Danimarka
+   - İrlanda
+   - Malta
    - İsveç
+   - Çekya
+   - Hırvatistan
+   - Bulgaristan
+   - Finlandiya
+   - Slovenya
+   - Danimarka
+   - Norveç
+   - Estonya
+   - Litvanya
+   - Lüksemburg
+   - Ukrayna
+   - Letonya
 
 3. Şehir seçimi yapın:
    - Ankara

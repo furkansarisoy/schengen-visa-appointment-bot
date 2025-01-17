@@ -35,15 +35,22 @@ API_URL = "https://api.schengenvisaappointments.com/api/visa-list/?format=json"
 # Ülke isimleri sözlüğü
 COUNTRIES_TR = {
     'France': 'Fransa',
-    'Germany': 'Almanya',
     'Netherlands': 'Hollanda',
-    'Italy': 'İtalya',
-    'Spain': 'İspanya',
-    'Greece': 'Yunanistan',
-    'Belgium': 'Belçika',
-    'Austria': 'Avusturya',
+    'Ireland': 'İrlanda',
+    'Malta': 'Malta',
+    'Sweden': 'İsveç',
+    'Czechia': 'Çekya',
+    'Croatia': 'Hırvatistan',
+    'Bulgaria': 'Bulgaristan',
+    'Finland': 'Finlandiya',
+    'Slovenia': 'Slovenya',
     'Denmark': 'Danimarka',
-    'Sweden': 'İsveç'
+    'Norway': 'Norveç',
+    'Estonia': 'Estonya',
+    'Lithuania': 'Litvanya',
+    'Luxembourg': 'Lüksemburg',
+    'Ukraine': 'Ukrayna',
+    'Latvia': 'Letonya',
 }
 
 # Ay isimleri sözlüğü
@@ -194,22 +201,29 @@ def get_user_input():
     # Ülke seçimi
     countries = {
         '1': 'France',
-        '2': 'Germany',
-        '3': 'Netherlands',
-        '4': 'Italy',
-        '5': 'Spain',
-        '6': 'Greece',
-        '7': 'Belgium',
-        '8': 'Austria',
-        '9': 'Denmark',
-        '10': 'Sweden'
+        '2': 'Netherlands',
+        '3': 'Ireland',
+        '4': 'Malta',
+        '5': 'Sweden',
+        '6': 'Czechia',
+        '7': 'Croatia',
+        '8': 'Bulgaria',
+        '9': 'Finland',
+        '10': 'Slovenia',
+        '11': 'Denmark',
+        '12': 'Norway',
+        '13': 'Estonia',
+        '14': 'Lithuania',
+        '15': 'Luxembourg',
+        '16': 'Ukraine',
+        '17': 'Latvia'
     }
     
     print("\nÜlke seçimi yapınız:")
     for key, value in countries.items():
-        print(f"{key}. {value}")
+        print(f"{key}. {COUNTRIES_TR.get(value, value)}")
     
-    country_choice = input("\nSeçiminiz (1-10): ")
+    country_choice = input("\nSeçiminiz (1-17): ")
     selected_country = countries.get(country_choice)
     
     if not selected_country:
