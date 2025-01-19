@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  ...(process.env.NODE_ENV === 'production' ? {
-    basePath: '/schengen-visa-appointment'
-  } : {}),
+  basePath: '/schengen-visa-appointment',
   images: {
     unoptimized: true
   }
