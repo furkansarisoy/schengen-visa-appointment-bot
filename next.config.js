@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: '/schengen-visa-appointment-bot',
+  basePath: process.env.NODE_ENV === 'production' ? '/schengen-visa-appointment-bot' : '',
   images: {
     unoptimized: true,
   },
-  assetPrefix: '/schengen-visa-appointment-bot/',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/schengen-visa-appointment-bot/' : '',
   trailingSlash: true,
 }
 
