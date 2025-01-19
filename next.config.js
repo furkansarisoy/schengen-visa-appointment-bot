@@ -5,8 +5,15 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  assetPrefix: '/schengen-visa-appointment',
+  assetPrefix: '/schengen-visa-appointment/',
   trailingSlash: true,
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader'],
+    });
+    return config;
+  },
 }
 
 module.exports = nextConfig 
