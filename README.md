@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛂 Schengen Vizesi Randevu Kontrol
 
-## Getting Started
+Modern web arayüzlü, gerçek zamanlı bildirim sistemine sahip Schengen vize randevu kontrol uygulaması.
 
-First, run the development server:
+## 🌟 Özellikler
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- 17 Avrupa ülkesi için randevu kontrolü:
+  - 🇫🇷 Fransa
+  - 🇳🇱 Hollanda
+  - 🇮🇪 İrlanda
+  - 🇲🇹 Malta
+  - 🇸🇪 İsveç
+  - 🇨🇿 Çekya
+  - 🇭🇷 Hırvatistan
+  - 🇧🇬 Bulgaristan
+  - 🇫🇮 Finlandiya
+  - 🇸🇮 Slovenya
+  - 🇩🇰 Danimarka
+  - 🇳🇴 Norveç
+  - 🇪🇪 Estonya
+  - 🇱🇹 Litvanya
+  - 🇱🇺 Lüksemburg
+  - 🇺🇦 Ukrayna
+  - 🇱🇻 Letonya
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 7 şehir için randevu takibi:
+  - Ankara
+  - İstanbul
+  - İzmir
+  - Antalya
+  - Bursa
+  - Edirne
+  - Gaziantep
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- 🔔 Bildirim Seçenekleri:
+  - Web bildirimleri
+  - Telegram bot bildirimleri (isteğe bağlı)
+  - Sesli bildirimler
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- ⚙️ Özelleştirilebilir Ayarlar:
+  - Kontrol sıklığı (1-60 dakika)
+  - Ülke ve şehir seçimi
+  - Telegram bildirimleri açma/kapama
 
-## Learn More
+## 🚀 Kullanım
 
-To learn more about Next.js, take a look at the following resources:
+1. Randevu ayarlarından ülke ve şehir seçin
+2. Kontrol sıklığını belirleyin (1-60 dakika)
+3. İsterseniz Telegram bildirimlerini aktifleştirin:
+   - Bot token ve Chat ID girin
+4. "Kontrolü Başlat" butonuna tıklayın
+5. Program otomatik olarak randevuları kontrol edecek ve bildirim gönderecektir
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔒 Güvenlik Uyarıları
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Telegram bot token'ınızı kimseyle paylaşmayın
+- Bot token'ınız ele geçirilirse hemen @BotFather üzerinden sıfırlayın
+- Yeni token aldıktan sonra uygulamada güncellemeyi unutmayın
 
-## Deploy on Vercel
+## 🛠️ Teknik Detaylar
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js 14 ile geliştirilmiştir
+- Modern ve responsive tasarım
+- Gerçek zamanlı API entegrasyonu
+- Hata yönetimi ve otomatik kurtarma
+- Tarayıcı bildirimleri desteği
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 Değişiklik Geçmişi
+
+### v2.0.0
+- Tamamen yeni modern arayüz
+- Telegram bildirimleri opsiyonel hale getirildi
+- Web bildirimleri eklendi
+- Sesli bildirimler eklendi
+- Ülke listesi genişletildi
+- Hata yönetimi geliştirildi
+- Performans iyileştirmeleri yapıldı
+
+## 📄 Lisans
+
+MIT License - Dilediğiniz gibi kullanabilir ve geliştirebilirsiniz.
