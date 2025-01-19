@@ -1,116 +1,32 @@
 #!/usr/bin/env python3
-"""
-Schengen Visa Appointment Check Program
-"""
-
-import os
-import sys
-import logging
-import json
+from quart import Quart, render_template, request, jsonify, websocket
+from telegram import Bot
 import asyncio
+import logging
+import os
+from datetime import datetime
 import aiohttp
-from dotenv import load_dotenv
-from telegram.ext import Application
+import json
 
-# Load environment variables
-load_dotenv()
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
-logger = logging.getLogger(__name__)
-
-# Telegram bot setup
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
-API_URL = "https://api.schengenvisaappointments.com/api/visa-list/?format=json"
-
-# Ülke isimleri sözlüğü
-COUNTRIES_TR = {
-    'France': 'Fransa',
-    'Netherlands': 'Hollanda',
-    'Ireland': 'İrlanda',
-    'Malta': 'Malta',
-    'Sweden': 'İsveç',
-    'Czechia': 'Çekya',
-    'Croatia': 'Hırvatistan',
-    'Bulgaria': 'Bulgaristan',
-    'Finland': 'Finlandiya',
-    'Slovenia': 'Slovenya',
-    'Denmark': 'Danimarka',
-    'Norway': 'Norveç',
-    'Estonia': 'Estonya',
-    'Lithuania': 'Litvanya',
-    'Luxembourg': 'Lüksemburg',
-    'Ukraine': 'Ukrayna',
-    'Latvia': 'Letonya',
-}
-
-# Ay isimleri sözlüğü
-MONTHS_TR = {
-    1: 'Ocak',
-    2: 'Şubat',
-    3: 'Mart',
-    4: 'Nisan',
-    5: 'Mayıs',
-    6: 'Haziran',
-    7: 'Temmuz',
-    8: 'Ağustos',
-    9: 'Eylül',
-    10: 'Ekim',
-    11: 'Kasım',
-    12: 'Aralık'
-}
-
-def format_date(date_str):
-    """Tarihi formatla: YYYY-MM-DD -> DD Month YYYY"""
-    try:
-        year, month, day = map(int, date_str.split('-'))
-        return f"{day} {MONTHS_TR[month]} {year}"
-    except:
-        return date_str  # Hata durumunda orijinal tarihi döndür
+app = Quart(__name__)
+appointment_checker = None
+check_task = None
+connected_websockets = set()
 
 class AppointmentChecker:
-    def __init__(self):
-        self.country = None
-        self.city = None
-        self.frequency = None
-        self.application = None
-        self.running = False
-        self.task = None
-        if TELEGRAM_BOT_TOKEN:
-            self.application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-
-    def set_parameters(self, country, city, frequency):
-        """Parametreleri güncelle"""
-        self.country = country
-        self.city = city
+    def __init__(self, bot_token, chat_id, selected_country, selected_city, frequency):
+        self.bot_token = bot_token
+        self.chat_id = chat_id
+        self.selected_country = selected_country
+        self.selected_city = selected_city
         self.frequency = frequency
-
-    async def stop(self):
-        """Programı durdur"""
         self.running = False
-        if self.task:
-            self.task.cancel()
-            try:
-                await self.task
-            except asyncio.CancelledError:
-                pass
-        if self.application:
-            await self.application.shutdown()
-
-    async def start_checking(self):
-        """Kontrolleri başlat"""
-        if self.application:
-            await self.application.initialize()
+        self.bot = None
         
+    async def initialize(self):
+        self.bot = Bot(token=self.bot_token)
+        
+    async def start_checking(self):
         self.running = True
         while self.running:
             try:
@@ -119,21 +35,14 @@ class AppointmentChecker:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Kontrol sırasında hata: {str(e)}")
-                await asyncio.sleep(5)  # Hata durumunda 5 saniye bekle
-
-    async def send_notification(self, message):
-        """Bildirim gönder"""
-        logger.info(message)
-        
-        if self.application and TELEGRAM_CHAT_ID:
-            try:
-                await self.application.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-            except Exception as e:
-                logger.error(f"Telegram bildirimi gönderilemedi: {str(e)}")
-
+                logging.error(f"Error during appointment check: {e}")
+                await asyncio.sleep(60)
+                
+    async def stop_checking(self):
+        self.running = False
+            
     async def check_appointments(self):
-        """API'den randevu kontrolü yap"""
+        API_URL = "https://api.schengenvisaappointments.com/api/visa-list/?format=json"
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(API_URL) as response:
@@ -144,205 +53,118 @@ class AppointmentChecker:
                     available_appointments = []
                     
                     for appointment in appointments:
-                        # Randevu tarihi kontrolü
-                        appointment_date = appointment.get('appointment_date')
-                        if not appointment_date:
-                            continue  # Randevu tarihi yoksa diğer kontrollere geçme
-                        
                         if (appointment['source_country'] == 'Turkiye' and 
-                            appointment['mission_country'].lower() == self.country.lower() and 
-                            self.city.lower() in appointment['center_name'].lower()):
+                            appointment['mission_country'].lower() == self.selected_country.lower() and 
+                            self.selected_city.lower() in appointment['center_name'].lower()):
                             
                             available_appointments.append({
                                 'country': appointment['mission_country'],
                                 'city': appointment['center_name'],
-                                'date': appointment_date,
+                                'date': appointment['appointment_date'],
                                 'category': appointment['visa_category'],
                                 'subcategory': appointment['visa_subcategory'],
                                 'link': appointment['book_now_link']
                             })
-
-                    if available_appointments:
-                        # Tarihe göre sırala
-                        available_appointments.sort(key=lambda x: x['date'])
-                        
-                        for appt in available_appointments:
-                            # Ülke adını Türkçeye çevir
-                            country_tr = COUNTRIES_TR.get(appt['country'], appt['country'])
-                            # Tarihi formatla
-                            formatted_date = format_date(appt['date'])
-
-                            message = f"🎉 {country_tr} için randevu bulundu!\n\n"
-                            message += f"🏢 Merkez: {appt['city']}\n"
-                            message += f"📅 Tarih: {formatted_date}\n"
-                            message += f"📋 Kategori: {appt['category']}\n"
-                            if appt['subcategory']:  # Alt kategori varsa ekle
-                                message += f"📝 Alt Kategori: {appt['subcategory']}\n"
-                            message += f"\n🔗 Randevu Linki:\n{appt['link']}"
-                            
-                            await self.send_notification(message)
-                        
-                        return True
                     
-                    logger.info(f"Uygun randevu bulunamadı: {self.country} - {self.city}")
+                    if available_appointments:
+                        message = f"🎉 {self.selected_country} için randevu bulundu!\n\n"
+                        for appt in available_appointments:
+                            message += f"🏢 Merkez: {appt['city']}\n"
+                            message += f"📅 Tarih: {appt['date']}\n"
+                            message += f"📋 Kategori: {appt['category']}\n"
+                            if appt['subcategory']:
+                                message += f"📝 Alt Kategori: {appt['subcategory']}\n"
+                            message += f"\n🔗 Randevu Linki:\n{appt['link']}\n\n"
+                        
+                        await self.bot.send_message(chat_id=self.chat_id, text=message)
+                        # Send message to all connected websockets
+                        for ws in connected_websockets:
+                            try:
+                                await ws.send(json.dumps({
+                                    "type": "appointment",
+                                    "message": message,
+                                    "timestamp": datetime.now().strftime("%H:%M:%S")
+                                }))
+                            except Exception as e:
+                                logging.error(f"WebSocket error: {e}")
+                        return True
+                    else:
+                        # Send status update to websockets
+                        for ws in connected_websockets:
+                            try:
+                                await ws.send(json.dumps({
+                                    "type": "status",
+                                    "message": f"Kontrol edildi: {self.selected_country} - {self.selected_city}",
+                                    "timestamp": datetime.now().strftime("%H:%M:%S")
+                                }))
+                            except Exception as e:
+                                logging.error(f"WebSocket error: {e}")
                     return False
-
+                    
         except Exception as e:
-            error_message = f"❌ API kontrolü sırasında hata: {str(e)}"
-            logger.error(error_message)
-            await self.send_notification(error_message)
+            logging.error(f"API kontrolü sırasında hata: {str(e)}")
             return False
 
-def get_user_input():
-    """Kullanıcıdan giriş al"""
-    print("\nSchengen Vize Randevu Kontrol Programı")
-    print("=====================================")
-    
-    # Ülke seçimi
-    countries = {
-        '1': 'France',
-        '2': 'Netherlands',
-        '3': 'Ireland',
-        '4': 'Malta',
-        '5': 'Sweden',
-        '6': 'Czechia',
-        '7': 'Croatia',
-        '8': 'Bulgaria',
-        '9': 'Finland',
-        '10': 'Slovenia',
-        '11': 'Denmark',
-        '12': 'Norway',
-        '13': 'Estonia',
-        '14': 'Lithuania',
-        '15': 'Luxembourg',
-        '16': 'Ukraine',
-        '17': 'Latvia'
-    }
-    
-    print("\nÜlke seçimi yapınız:")
-    for key, value in countries.items():
-        print(f"{key}. {COUNTRIES_TR.get(value, value)}")
-    
-    country_choice = input("\nSeçiminiz (1-17): ")
-    selected_country = countries.get(country_choice)
-    
-    if not selected_country:
-        raise ValueError("Geçersiz ülke seçimi!")
-    
-    # Şehir seçimi
-    cities = {
-        '1': 'Ankara',
-        '2': 'Istanbul',
-        '3': 'Izmir',
-        '4': 'Antalya',
-        '5': 'Gaziantep',
-		'6': 'Bursa',
-		'7': 'Antalya',
-		'8': 'Edirne',
-    }
-    
-    print("\nŞehir seçimi yapınız:")
-    for key, value in cities.items():
-        print(f"{key}. {value}")
-    
-    city_choice = input("\nSeçiminiz (1-5): ")
-    selected_city = cities.get(city_choice)
-    
-    if not selected_city:
-        raise ValueError("Geçersiz şehir seçimi!")
-    
-    # Kontrol sıklığı
-    print("\nKontrol sıklığı (dakika):")
-    frequency = int(input("Kaç dakikada bir kontrol edilsin? (1-60): "))
-    if frequency < 1 or frequency > 60:
-        raise ValueError("Geçersiz kontrol sıklığı! 1-60 dakika arası bir değer girin.")
-    
-    return selected_country, selected_city, frequency
-
-async def show_menu(checker):
-    """Ana menüyü göster"""
-    while True:
-        try:
-            print("\nMenü:")
-            print("1. Yeni sorgu başlat")
-            print("2. Mevcut sorguyu durdur")
-            print("3. Programdan çık")
-            
-            choice = input("\nSeçiminiz (1-3): ")
-            
-            if choice == '1':
-                if checker.running:
-                    await checker.stop()
-                
-                country, city, frequency = get_user_input()
-                checker.set_parameters(country, city, frequency)
-                print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
-                print(f"Kontrol sıklığı: {frequency} dakika")
-                print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
-                
-                return  # Menüden çık ve ana döngüye dön
-                    
-            elif choice == '2':
-                if checker.running:
-                    await checker.stop()
-                    print("\nSorgu durduruldu.")
-                else:
-                    print("\nAktif sorgu bulunmuyor.")
-                    
-            elif choice == '3':
-                if checker.running:
-                    await checker.stop()
-                print("\nProgram sonlandırılıyor...")
-                sys.exit(0)
-            else:
-                print("\nGeçersiz seçim!")
-                
-        except KeyboardInterrupt:
-            print("\nMenüden çıkılıyor...")
-            return  # Menüden çık ve ana döngüye dön
-        except ValueError as e:
-            print(f"\nHata: {str(e)}")
-
-async def main():
-    """Ana program"""
-    checker = AppointmentChecker()
-    
-    while True:
-        try:
-            # İlk sorguyu al ve başlat
-            country, city, frequency = get_user_input()
-            checker.set_parameters(country, city, frequency)
-            print(f"\n{country} için {city} şehrinde randevu kontrolü başlatılıyor...")
-            print(f"Kontrol sıklığı: {frequency} dakika")
-            print("\nProgram çalışıyor... Menüye dönmek için Ctrl+C'ye basın.\n")
-            
-            checker.task = asyncio.create_task(checker.start_checking())
-            try:
-                await checker.task
-            except asyncio.CancelledError:
-                pass
-            
-        except KeyboardInterrupt:
-            print("\nMenüye dönülüyor...")
-            if checker.running:
-                await checker.stop()
-            try:
-                await show_menu(checker)
-            except Exception as e:
-                print(f"\nMenü gösterilirken hata oluştu: {str(e)}")
-        except ValueError as e:
-            print(f"\nHata: {str(e)}")
-            continue
-        except Exception as e:
-            print(f"\nBeklenmeyen hata: {str(e)}")
-            if checker.running:
-                await checker.stop()
-            continue
-
-if __name__ == "__main__":
+@app.websocket('/ws')
+async def ws():
+    connected_websockets.add(websocket._get_current_object())
     try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nProgram sonlandırıldı.")
+        while True:
+            await websocket.receive()
     except Exception as e:
-        print(f"\nKritik hata: {str(e)}") 
+        logging.error(f"WebSocket error: {e}")
+    finally:
+        connected_websockets.remove(websocket._get_current_object())
+
+@app.route('/')
+async def index():
+    return await render_template('index.html')
+
+@app.route('/start', methods=['POST'])
+async def start_checking():
+    global appointment_checker, check_task
+    
+    try:
+        data = await request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "Invalid JSON data"}), 400
+            
+        bot_token = data.get('bot_token')
+        chat_id = data.get('chat_id')
+        country = data.get('country')
+        city = data.get('city')
+        frequency = int(data.get('frequency', 5))
+        
+        if appointment_checker:
+            await appointment_checker.stop_checking()
+            
+        appointment_checker = AppointmentChecker(bot_token, chat_id, country, city, frequency)
+        await appointment_checker.initialize()
+        
+        check_task = asyncio.create_task(appointment_checker.start_checking())
+        return jsonify({"status": "success", "message": "Randevu kontrolü başlatıldı"})
+    except Exception as e:
+        logging.error(f"Start error: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/stop', methods=['POST'])
+async def stop_checking():
+    global appointment_checker, check_task
+    
+    try:
+        if appointment_checker:
+            await appointment_checker.stop_checking()
+            appointment_checker = None
+            
+        if check_task:
+            check_task.cancel()
+            check_task = None
+            
+        return jsonify({"status": "success", "message": "Randevu kontrolü durduruldu"})
+    except Exception as e:
+        logging.error(f"Stop error: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    app.run(host='127.0.0.1', port=5000) 

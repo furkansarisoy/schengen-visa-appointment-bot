@@ -1,168 +1,36 @@
-# Schengen Vize Randevu Kontrol Programı 🔍
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Bu program, Schengen vizesi için randevu kontrolü yapmanızı sağlar. Program belirttiğiniz ülke ve şehir için düzenli olarak randevu kontrolü yapar ve uygun randevu bulunduğunda Telegram üzerinden bildirim gönderir.
+## Getting Started
 
-## Özellikler ✨
+First, run the development server:
 
-- 17 Avrupa ülkesi için randevu kontrolü:
-  - Fransa 🇫🇷
-  - Hollanda 🇳🇱
-  - İrlanda 🇮🇪
-  - Malta 🇲🇹
-  - İsveç 🇸🇪
-  - Çekya 🇨🇿
-  - Hırvatistan 🇭🇷
-  - Bulgaristan 🇧🇬
-  - Finlandiya 🇫🇮
-  - Slovenya 🇸🇮
-  - Danimarka 🇩🇰
-  - Norveç 🇳🇴
-  - Estonya 🇪🇪
-  - Litvanya 🇱🇹
-  - Lüksemburg 🇱🇺
-  - Ukrayna 🇺🇦
-  - Letonya 🇱🇻
-
-- Türkiye'deki tüm VFS Global merkezleri desteklenir
-- Telegram üzerinden anlık bildirimler
-- Kullanıcı dostu menü arayüzü
-- Otomatik randevu kontrolü
-- Tarih bazlı sıralama ve Türkçe tarih formatı
-
-## Güvenlik Uyarıları ⚠️
-
-1. `.env` dosyası asla GitHub'a yüklenmemeli
-2. Bot token'ınızı asla public yapmamalısınız
-3. Eğer token'ınız yanlışlıkla public olduysa:
-   - Hemen @BotFather'dan `/revoke` komutu ile iptal edin
-   - Yeni bir bot token alın
-   - `.env` dosyasını güncelleyin
-
-## Kurulum 🛠️
-
-1. Python 3.8 veya üzeri sürümü yükleyin
-2. Gerekli paketleri yükleyin:
 ```bash
-pip install python-telegram-bot python-dotenv aiohttp
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-3. Telegram Bot Kurulumu:
-   1. Telegram'da [@BotFather](https://t.me/BotFather) ile yeni bir sohbet başlatın
-   2. `/newbot` komutunu gönderin
-   3. Bot için bir isim girin (örn: "Schengen Randevu Bot")
-   4. Bot için bir kullanıcı adı girin (örn: "schengen_randevu_bot")
-   5. BotFather size bir API token verecek (örn: "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")
-   6. Bu token'ı güvenli bir yerde saklayın
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-4. Chat ID Alma:
-   1. Oluşturduğunuz bot ile bir sohbet başlatın
-   2. Bota herhangi bir mesaj gönderin
-   3. Tarayıcınızda şu adrese gidin:
-      ```
-      https://api.telegram.org/bot<YourBOTToken>/getUpdates
-      ```
-      (YourBOTToken yerine BotFather'dan aldığınız token'ı yazın)
-   4. Açılan sayfada "chat" altındaki "id" değerini bulun ve not alın
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-5. `.env` Dosyası Oluşturma:
-   1. Proje klasöründe `.env` adında bir dosya oluşturun
-   2. Dosyaya şu bilgileri ekleyin:
-      ```
-      TELEGRAM_BOT_TOKEN=your_bot_token
-      TELEGRAM_CHAT_ID=your_chat_id
-      ```
-   3. `your_bot_token` yerine BotFather'dan aldığınız token'ı yazın
-   4. `your_chat_id` yerine bir önceki adımda aldığınız Chat ID'yi yazın
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-6. Bot'u Test Etme:
-   1. Programı çalıştırın:
-      ```bash
-      python check_appointment.py
-      ```
-   2. Randevu bulunduğunda bot size otomatik olarak bildirim gönderecektir
+## Learn More
 
-Not: Telegram botunuzun gizliliğini korumak için:
-- `.env` dosyasını asla GitHub'a yüklemeyin
-- Bot token'ınızı kimseyle paylaşmayın
-- Botunuzu sadece kendi kullanımınız için ayarlayın
+To learn more about Next.js, take a look at the following resources:
 
-## Kullanım 📱
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-1. Programı başlatın:
-```bash
-python check_appointment.py
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-2. Ülke seçimi yapın (1-17):
-   - Fransa
-   - Hollanda
-   - İrlanda
-   - Malta
-   - İsveç
-   - Çekya
-   - Hırvatistan
-   - Bulgaristan
-   - Finlandiya
-   - Slovenya
-   - Danimarka
-   - Norveç
-   - Estonya
-   - Litvanya
-   - Lüksemburg
-   - Ukrayna
-   - Letonya
+## Deploy on Vercel
 
-3. Şehir seçimi yapın:
-   - Ankara
-   - Istanbul
-   - Izmir
-   - Antalya
-   - Gaziantep
-   - Bursa
-   - Edirne
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-4. Kontrol sıklığını belirleyin (1-60 dakika)
-
-## Menü Seçenekleri 📋
-
-- **Yeni sorgu başlat**: Yeni ülke ve şehir için randevu kontrolü başlatır
-- **Mevcut sorguyu durdur**: Aktif sorguyu durdurur
-- **Programdan çık**: Programı sonlandırır
-
-## Bildirimler 📬
-
-Program randevu bulduğunda Telegram üzerinden aşağıdaki bilgileri içeren bir bildirim gönderir:
-- Ülke adı (Türkçe)
-- Merkez bilgisi
-- Randevu tarihi (örn: 7 Şubat 2025)
-- Vize kategorisi
-- Alt kategori (varsa)
-- Randevu linki
-
-## Kısayollar ⌨️
-
-- **Ctrl+C**: Menüye dönmek için
-- **3**: Programdan çıkmak için
-
-## Notlar 📝
-
-- Program her kontrol sonrası belirlediğiniz süre kadar bekler
-- Randevular tarih sırasına göre listelenir
-- Telegram bildirimleri için bot token ve chat ID gereklidir
-- Program kesintisiz çalışabilir, istediğiniz zaman menüden kontrol edebilirsiniz
-
-## Hata Durumları ⚠️
-
-Program aşağıdaki durumlarda sizi bilgilendirir:
-- API bağlantı hataları
-- Geçersiz ülke/şehir seçimleri
-- Telegram bildirim hataları
-- Diğer beklenmeyen hatalar
-
-## Katkıda Bulunma 🤝
-
-1. Bu depoyu fork edin
-2. Yeni bir branch oluşturun (`git checkout -b feature/amazing`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik eklendi'`)
-4. Branch'inizi push edin (`git push origin feature/amazing`)
-5. Pull Request oluşturun 
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
