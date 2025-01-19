@@ -316,3 +316,20 @@ input:checked + .toggle-slider:before {
   overflow-y: auto;
   padding-right: 0.5rem;
 }
+
+/* Mobil görünüm için media query */
+@media (max-width: 768px) {
+  .settings-inputs,
+  .telegram-inputs {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+}
