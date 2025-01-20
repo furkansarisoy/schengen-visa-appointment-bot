@@ -1,104 +1,139 @@
-# 🛂 Schengen Vizesi Randevu Kontrol
+# 🌍 Schengen Vizesi Randevu Takip Uygulaması
 
-Modern web arayüzlü, gerçek zamanlı bildirim sistemine sahip Schengen vize randevu kontrol uygulaması.
+Modern web arayüzlü ve terminal tabanlı, gerçek zamanlı bildirim sistemine sahip Schengen vize randevu kontrol uygulaması.
 
-## 🌟 Özellikler
+## 🚀 Özellikler
 
-<<<<<<< HEAD
-- 17 Avrupa ülkesi için randevu kontrolü:
-  - 🇫🇷 Fransa
-  - 🇳🇱 Hollanda
-  - 🇮🇪 İrlanda
-  - 🇲🇹 Malta
-  - 🇸🇪 İsveç
-  - 🇨🇿 Çekya
-  - 🇭🇷 Hırvatistan
-  - 🇧🇬 Bulgaristan
-  - 🇫🇮 Finlandiya
-  - 🇸🇮 Slovenya
-  - 🇩🇰 Danimarka
-  - 🇳🇴 Norveç
-  - 🇪🇪 Estonya
-  - 🇱🇹 Litvanya
-  - 🇱🇺 Lüksemburg
-  - 🇺🇦 Ukrayna
-  - 🇱🇻 Letonya
-=======
-- 10 Schengen ülkesi için randevu kontrolü
-- Türkiye'deki tüm VFS Global merkezleri desteklenir
-- Telegram üzerinden anlık bildirimler
-- Kullanıcı dostu menü arayüzü
-- Otomatik randevu kontrolü
-- Tarih bazlı sıralama ve Türkçe tarih formatı
->>>>>>> parent of bde6bcc (edited read me:( and countries :()
+- 17 Schengen ülkesi için randevu kontrolü:
+  - Fransa 🇫🇷
+  - Hollanda 🇳🇱
+  - İrlanda 🇮🇪
+  - Malta 🇲🇹
+  - İsveç 🇸🇪
+  - Çekya 🇨🇿
+  - Hırvatistan 🇭🇷
+  - Bulgaristan 🇧🇬
+  - Finlandiya 🇫🇮
+  - Slovenya 🇸🇮
+  - Danimarka 🇩🇰
+  - Norveç 🇳🇴
+  - Estonya 🇪🇪
+  - Litvanya 🇱🇹
+  - Lüksemburg 🇱🇺
+  - Ukrayna 🇺🇦
+  - Letonya 🇱🇻
 
-- 7 şehir için randevu takibi:
-  - Ankara
-  - İstanbul
-  - İzmir
-  - Antalya
-  - Bursa
-  - Edirne
-  - Gaziantep
+- İki farklı kullanım seçeneği:
+  1. 🖥️ Modern Web Arayüzü (Next.js)
+  2. ⌨️ Terminal Uygulaması (Python)
 
-- 🔔 Bildirim Seçenekleri:
-  - Web bildirimleri
-  - Telegram bot bildirimleri (isteğe bağlı)
-  - Sesli bildirimler
+- Bildirim seçenekleri:
+  - 🤖 Telegram bildirimleri
+  - 🔔 Web bildirimleri (sadece web arayüzünde)
+  - 🔊 Sesli bildirimler
+  - 📝 Mesaj geçmişi
 
-- ⚙️ Özelleştirilebilir Ayarlar:
-  - Kontrol sıklığı (1-60 dakika)
-  - Ülke ve şehir seçimi
-  - Telegram bildirimleri açma/kapama
+## 💻 Sistem Gereksinimleri
 
-## 🚀 Kullanım
+### Web Arayüzü için:
+- Node.js 18.0.0 veya üzeri
+- npm (Node.js ile birlikte gelir)
+- Modern bir web tarayıcısı
 
-1. Randevu ayarlarından ülke ve şehir seçin
-2. Kontrol sıklığını belirleyin (1-60 dakika)
-3. İsterseniz Telegram bildirimlerini aktifleştirin:
-   - Bot token ve Chat ID girin
-4. "Kontrolü Başlat" butonuna tıklayın
-5. Program otomatik olarak randevuları kontrol edecek ve bildirim gönderecektir
+### Terminal Uygulaması için:
+- Python 3.8 veya üzeri
+- pip (Python paket yöneticisi)
 
-## 🔒 Güvenlik Uyarıları
+## 🛠️ Kurulum
 
-- Telegram bot token'ınızı kimseyle paylaşmayın
-- Bot token'ınız ele geçirilirse hemen @BotFather üzerinden sıfırlayın
-- Yeni token aldıktan sonra uygulamada güncellemeyi unutmayın
+### Web Arayüzü Kurulumu:
 
-## 🛠️ Teknik Detaylar
+1. Node.js'i yükleyin:
+   - Windows için: [nodejs.org](https://nodejs.org)
+   - macOS için: `brew install node`
+   - Linux için: `sudo apt install nodejs npm`
 
-- Next.js 14 ile geliştirilmiştir
-- Modern ve responsive tasarım
-- Gerçek zamanlı API entegrasyonu
-- Hata yönetimi ve otomatik kurtarma
-- Tarayıcı bildirimleri desteği
+2. Projeyi indirin ve web arayüzünü başlatın:
+   ```bash
+   git clone https://github.com/KULLANICI_ADI/REPO_ADI.git
+   cd REPO_ADI
+   npm install
+   npm run dev
+   ```
 
-## 📝 Değişiklik Geçmişi
+3. Tarayıcınızda açın:
+   ```
+   http://localhost:3000
+   ```
 
-### v2.0.0
-- Tamamen yeni modern arayüz
-- Telegram bildirimleri opsiyonel hale getirildi
-- Web bildirimleri eklendi
-- Sesli bildirimler eklendi
-- Ülke listesi genişletildi
-- Hata yönetimi geliştirildi
-- Performans iyileştirmeleri yapıldı
+### Terminal Uygulaması Kurulumu:
 
-<<<<<<< HEAD
-## 📄 Lisans
-=======
-2. Ülke seçimi yapın (1-10):
-   - Fransa
-   - Almanya
-   - Hollanda
-   - İtalya
-   - İspanya
-   - Yunanistan
-   - Belçika
-   - Avusturya
-   - Danimarka
-   - İsveç
->>>>>>> parent of bde6bcc (edited read me:( and countries :()
+1. Python'u yükleyin:
+   - Windows için: [python.org](https://python.org)
+   - macOS için: `brew install python`
+   - Linux için: `sudo apt install python3 python3-pip`
 
-MIT License - Dilediğiniz gibi kullanabilir ve geliştirebilirsiniz.
+2. Gerekli paketleri yükleyin:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. Uygulamayı başlatın:
+   ```bash
+   python check_appointment.py
+   ```
+
+## 🤖 Telegram Bot Kurulumu
+
+1. [@BotFather](https://t.me/botfather) ile konuşma başlatın
+2. `/newbot` komutu ile bot oluşturun
+3. Bot token'ı kaydedin
+4. Bot ile konuşma başlatın
+5. Chat ID'nizi alın:
+   ```
+   https://api.telegram.org/botTOKEN/getUpdates
+   ```
+
+### Web Arayüzü için:
+- Telegram ayarları bölümünden token ve chat ID'yi girin
+
+### Terminal Uygulaması için:
+- `.env` dosyası oluşturun:
+  ```
+  TELEGRAM_BOT_TOKEN=your_bot_token
+  TELEGRAM_CHAT_ID=your_chat_id
+  ```
+
+## 🔧 Sorun Giderme
+
+### Web Arayüzü Sorunları:
+1. "npm not found":
+   - Node.js'i yeniden yükleyin
+2. Port 3000 hatası:
+   - Portu değiştirin: `PORT=3001 npm run dev`
+
+### Terminal Uygulaması Sorunları:
+1. "python/pip not found":
+   - Python'u PATH'e ekleyin
+2. ModuleNotFoundError:
+   - `pip install -r requirements.txt` komutunu tekrar çalıştırın
+
+## 🔒 Güvenlik
+
+- Bot token'ınızı gizli tutun
+- .env dosyasını asla paylaşmayın
+- Düzenli güvenlik güncellemelerini takip edin
+
+## 📝 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+## 🤝 Katkıda Bulunma
+
+1. Fork yapın
+2. Feature branch oluşturun
+3. Değişikliklerinizi commit edin
+4. Branch'inizi push edin
+5. Pull Request oluşturun

@@ -114,8 +114,21 @@ export default function Home() {
       'Latvia': 'Letonya'
     };
 
+    // Tarihi geçerli olan randevuları filtrele
+    const validAppointments = appointments.filter(appt => {
+      if (!appt.appointment_date) return false;
+      try {
+        const [year, month, day] = appt.appointment_date.split('-');
+        return year && month && day && !isNaN(Date.parse(appt.appointment_date));
+      } catch {
+        return false;
+      }
+    });
+
+    if (validAppointments.length === 0) return null;
+
     let message = `🎉 ${countryTr[country] || country} için randevu bulundu!\n\n`;
-    appointments.forEach((appt, index) => {
+    validAppointments.forEach((appt, index) => {
       if (index > 0) message += '\n----------------------------\n\n';
       message += `📅 RANDEVU TARİHİ: ${formatDate(appt.appointment_date)}\n`;
       message += `🏢 Merkez: ${appt.center_name || 'Belirtilmemiş'}\n`;
