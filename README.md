@@ -1,167 +1,104 @@
-# Schengen Vize Randevu Kontrol Programı 🔍
+# 🛂 Schengen Vizesi Randevu Kontrol
 
-Bu program, Schengen vizesi için randevu kontrolü yapmanızı sağlar. Program belirttiğiniz ülke ve şehir için düzenli olarak randevu kontrolü yapar ve uygun randevu bulunduğunda Telegram üzerinden bildirim gönderir.
+Modern web arayüzlü, gerçek zamanlı bildirim sistemine sahip Schengen vize randevu kontrol uygulaması.
 
-## Özellikler ✨
+## 🌟 Özellikler
 
-- 17 Schengen ülkesi için randevu kontrolü:
-  - Fransa 🇫🇷
-  - Almanya 🇩🇪
-  - Hollanda 🇳🇱
-  - İtalya 🇮🇹
-  - İspanya 🇪🇸
-  - Yunanistan 🇬🇷
-  - Belçika 🇧🇪
-  - Avusturya 🇦🇹
-  - Danimarka 🇩🇰
-  - İsveç 🇸🇪
-  - İsviçre 🇨🇭
-  - Norveç 🇳🇴
-  - Finlandiya 🇫🇮
-  - Portekiz 🇵🇹
-  - Çek Cumhuriyeti 🇨🇿
-  - Macaristan 🇭🇺
-  - Polonya 🇵🇱
+<<<<<<< HEAD
+- 17 Avrupa ülkesi için randevu kontrolü:
+  - 🇫🇷 Fransa
+  - 🇳🇱 Hollanda
+  - 🇮🇪 İrlanda
+  - 🇲🇹 Malta
+  - 🇸🇪 İsveç
+  - 🇨🇿 Çekya
+  - 🇭🇷 Hırvatistan
+  - 🇧🇬 Bulgaristan
+  - 🇫🇮 Finlandiya
+  - 🇸🇮 Slovenya
+  - 🇩🇰 Danimarka
+  - 🇳🇴 Norveç
+  - 🇪🇪 Estonya
+  - 🇱🇹 Litvanya
+  - 🇱🇺 Lüksemburg
+  - 🇺🇦 Ukrayna
+  - 🇱🇻 Letonya
+=======
+- 10 Schengen ülkesi için randevu kontrolü
 - Türkiye'deki tüm VFS Global merkezleri desteklenir
 - Telegram üzerinden anlık bildirimler
 - Kullanıcı dostu menü arayüzü
 - Otomatik randevu kontrolü
 - Tarih bazlı sıralama ve Türkçe tarih formatı
+>>>>>>> parent of bde6bcc (edited read me:( and countries :()
 
-## Güvenlik Uyarıları ⚠️
+- 7 şehir için randevu takibi:
+  - Ankara
+  - İstanbul
+  - İzmir
+  - Antalya
+  - Bursa
+  - Edirne
+  - Gaziantep
 
-1. `.env` dosyası asla GitHub'a yüklenmemeli
-2. Bot token'ınızı asla public yapmamalısınız
-3. Eğer token'ınız yanlışlıkla public olduysa:
-   - Hemen @BotFather'dan `/revoke` komutu ile iptal edin
-   - Yeni bir bot token alın
-   - `.env` dosyasını güncelleyin
+- 🔔 Bildirim Seçenekleri:
+  - Web bildirimleri
+  - Telegram bot bildirimleri (isteğe bağlı)
+  - Sesli bildirimler
 
-## Kurulum 🛠️
+- ⚙️ Özelleştirilebilir Ayarlar:
+  - Kontrol sıklığı (1-60 dakika)
+  - Ülke ve şehir seçimi
+  - Telegram bildirimleri açma/kapama
 
-1. Python 3.8 veya üzeri sürümü yükleyin
-2. Gerekli paketleri yükleyin:
-```bash
-pip install python-telegram-bot python-dotenv aiohttp
-```
+## 🚀 Kullanım
 
-3. Telegram Bot Kurulumu:
-   1. Telegram'da [@BotFather](https://t.me/BotFather) ile yeni bir sohbet başlatın
-   2. `/newbot` komutunu gönderin
-   3. Bot için bir isim girin (örn: "Schengen Randevu Bot")
-   4. Bot için bir kullanıcı adı girin (örn: "schengen_randevu_bot")
-   5. BotFather size bir API token verecek (örn: "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")
-   6. Bu token'ı güvenli bir yerde saklayın
+1. Randevu ayarlarından ülke ve şehir seçin
+2. Kontrol sıklığını belirleyin (1-60 dakika)
+3. İsterseniz Telegram bildirimlerini aktifleştirin:
+   - Bot token ve Chat ID girin
+4. "Kontrolü Başlat" butonuna tıklayın
+5. Program otomatik olarak randevuları kontrol edecek ve bildirim gönderecektir
 
-4. Chat ID Alma:
-   1. Oluşturduğunuz bot ile bir sohbet başlatın
-   2. Bota herhangi bir mesaj gönderin
-   3. Tarayıcınızda şu adrese gidin:
-      ```
-      https://api.telegram.org/bot<YourBOTToken>/getUpdates
-      ```
-      (YourBOTToken yerine BotFather'dan aldığınız token'ı yazın)
-   4. Açılan sayfada "chat" altındaki "id" değerini bulun ve not alın
+## 🔒 Güvenlik Uyarıları
 
-5. `.env` Dosyası Oluşturma:
-   1. Proje klasöründe `.env` adında bir dosya oluşturun
-   2. Dosyaya şu bilgileri ekleyin:
-      ```
-      TELEGRAM_BOT_TOKEN=your_bot_token
-      TELEGRAM_CHAT_ID=your_chat_id
-      ```
-   3. `your_bot_token` yerine BotFather'dan aldığınız token'ı yazın
-   4. `your_chat_id` yerine bir önceki adımda aldığınız Chat ID'yi yazın
+- Telegram bot token'ınızı kimseyle paylaşmayın
+- Bot token'ınız ele geçirilirse hemen @BotFather üzerinden sıfırlayın
+- Yeni token aldıktan sonra uygulamada güncellemeyi unutmayın
 
-6. Bot'u Test Etme:
-   1. Programı çalıştırın:
-      ```bash
-      python check_appointment.py
-      ```
-   2. Randevu bulunduğunda bot size otomatik olarak bildirim gönderecektir
+## 🛠️ Teknik Detaylar
 
-Not: Telegram botunuzun gizliliğini korumak için:
-- `.env` dosyasını asla GitHub'a yüklemeyin
-- Bot token'ınızı kimseyle paylaşmayın
-- Botunuzu sadece kendi kullanımınız için ayarlayın
+- Next.js 14 ile geliştirilmiştir
+- Modern ve responsive tasarım
+- Gerçek zamanlı API entegrasyonu
+- Hata yönetimi ve otomatik kurtarma
+- Tarayıcı bildirimleri desteği
 
-## Kullanım 📱
+## 📝 Değişiklik Geçmişi
 
-1. Programı başlatın:
-```bash
-python check_appointment.py
-```
+### v2.0.0
+- Tamamen yeni modern arayüz
+- Telegram bildirimleri opsiyonel hale getirildi
+- Web bildirimleri eklendi
+- Sesli bildirimler eklendi
+- Ülke listesi genişletildi
+- Hata yönetimi geliştirildi
+- Performans iyileştirmeleri yapıldı
 
-2. Ülke seçimi yapın (1-17):
-   - Fransa 🇫🇷
-   - Almanya 🇩🇪
-   - Hollanda 🇳🇱
-   - İtalya 🇮🇹
-   - İspanya 🇪🇸
-   - Yunanistan 🇬🇷
-   - Belçika 🇧🇪
-   - Avusturya 🇦🇹
-   - Danimarka 🇩🇰
-   - İsveç 🇸🇪
-   - İsviçre 🇨🇭
-   - Norveç 🇳��
-   - Finlandiya ��🇮
-   - Portekiz 🇵🇹
-   - Çek Cumhuriyeti 🇨🇿
-   - Macaristan 🇭🇺
-   - Polonya 🇵🇱
+<<<<<<< HEAD
+## 📄 Lisans
+=======
+2. Ülke seçimi yapın (1-10):
+   - Fransa
+   - Almanya
+   - Hollanda
+   - İtalya
+   - İspanya
+   - Yunanistan
+   - Belçika
+   - Avusturya
+   - Danimarka
+   - İsveç
+>>>>>>> parent of bde6bcc (edited read me:( and countries :()
 
-3. Şehir seçimi yapın:
-   - Ankara
-   - Istanbul
-   - Izmir
-   - Antalya
-   - Gaziantep
-   - Bursa
-   - Edirne
-
-4. Kontrol sıklığını belirleyin (1-60 dakika)
-
-## Menü Seçenekleri 📋
-
-- **Yeni sorgu başlat**: Yeni ülke ve şehir için randevu kontrolü başlatır
-- **Mevcut sorguyu durdur**: Aktif sorguyu durdurur
-- **Programdan çık**: Programı sonlandırır
-
-## Bildirimler 📬
-
-Program randevu bulduğunda Telegram üzerinden aşağıdaki bilgileri içeren bir bildirim gönderir:
-- Ülke adı (Türkçe)
-- Merkez bilgisi
-- Randevu tarihi (örn: 7 Şubat 2025)
-- Vize kategorisi
-- Alt kategori (varsa)
-- Randevu linki
-
-## Kısayollar ⌨️
-
-- **Ctrl+C**: Menüye dönmek için
-- **3**: Programdan çıkmak için
-
-## Notlar 📝
-
-- Program her kontrol sonrası belirlediğiniz süre kadar bekler
-- Randevular tarih sırasına göre listelenir
-- Telegram bildirimleri için bot token ve chat ID gereklidir
-- Program kesintisiz çalışabilir, istediğiniz zaman menüden kontrol edebilirsiniz
-
-## Hata Durumları ⚠️
-
-Program aşağıdaki durumlarda sizi bilgilendirir:
-- API bağlantı hataları
-- Geçersiz ülke/şehir seçimleri
-- Telegram bildirim hataları
-- Diğer beklenmeyen hatalar
-
-## Katkıda Bulunma 🤝
-
-1. Bu depoyu fork edin
-2. Yeni bir branch oluşturun (`git checkout -b feature/amazing`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik eklendi'`)
-4. Branch'inizi push edin (`git push origin feature/amazing`)
-5. Pull Request oluşturun 
+MIT License - Dilediğiniz gibi kullanabilir ve geliştirebilirsiniz.
