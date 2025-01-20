@@ -43,7 +43,14 @@ COUNTRIES_TR = {
     'Belgium': 'Belçika',
     'Austria': 'Avusturya',
     'Denmark': 'Danimarka',
-    'Sweden': 'İsveç'
+    'Sweden': 'İsveç',
+    'Switzerland': 'İsviçre',
+    'Norway': 'Norveç',
+    'Finland': 'Finlandiya',
+    'Portugal': 'Portekiz',
+    'Czech Republic': 'Çek Cumhuriyeti',
+    'Hungary': 'Macaristan',
+    'Poland': 'Polonya'
 }
 
 # Ay isimleri sözlüğü
@@ -202,14 +209,22 @@ def get_user_input():
         '7': 'Belgium',
         '8': 'Austria',
         '9': 'Denmark',
-        '10': 'Sweden'
+        '10': 'Sweden',
+        '11': 'Switzerland',
+        '12': 'Norway',
+        '13': 'Finland',
+        '14': 'Portugal',
+        '15': 'Czech Republic',
+        '16': 'Hungary',
+        '17': 'Poland'
     }
     
     print("\nÜlke seçimi yapınız:")
     for key, value in countries.items():
-        print(f"{key}. {value}")
+        country_tr = COUNTRIES_TR.get(value, value)
+        print(f"{key}. {value} ({country_tr})")
     
-    country_choice = input("\nSeçiminiz (1-10): ")
+    country_choice = input("\nSeçiminiz (1-17): ")
     selected_country = countries.get(country_choice)
     
     if not selected_country:
@@ -222,16 +237,15 @@ def get_user_input():
         '3': 'Izmir',
         '4': 'Antalya',
         '5': 'Gaziantep',
-		'6': 'Bursa',
-		'7': 'Antalya',
-		'8': 'Edirne',
+        '6': 'Bursa',
+        '7': 'Edirne'
     }
     
     print("\nŞehir seçimi yapınız:")
     for key, value in cities.items():
         print(f"{key}. {value}")
     
-    city_choice = input("\nSeçiminiz (1-5): ")
+    city_choice = input("\nSeçiminiz (1-7): ")
     selected_city = cities.get(city_choice)
     
     if not selected_city:
