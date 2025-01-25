@@ -40,6 +40,16 @@ const THEME_COLORS = {
 export default function ThemeToggle() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // Telegram input'larını güncelle
+  const updateTelegramInputs = (colors) => {
+    const telegramInputs = document.querySelectorAll('.telegram-section input');
+    telegramInputs.forEach(input => {
+      input.style.setProperty('background-color', colors.inputBg, 'important');
+      input.style.setProperty('color', colors.text, 'important');
+      input.style.setProperty('border-color', colors.border, 'important');
+    });
+  };
+
   const applyTheme = (dark) => {
     const colors = dark ? THEME_COLORS.dark : THEME_COLORS.light;
     
@@ -54,14 +64,17 @@ export default function ThemeToggle() {
     document.querySelectorAll('.form-group label, .input-label')
       .forEach(el => el.style.setProperty('color', colors.labelText));
     
-    // Input alanları (Telegram input'ları dahil)
-    document.querySelectorAll('.form-group input, .form-group select, .telegram-section input')
+    // Normal input'lar
+    document.querySelectorAll('.form-group input, .form-group select')
       .forEach(el => {
         el.style.setProperty('background-color', colors.inputBg);
         el.style.setProperty('color', colors.text);
         el.style.setProperty('border-color', colors.border);
         el.style.setProperty('box-shadow', dark ? '0 2px 4px rgba(0, 0, 0, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.05)');
       });
+    
+    // Telegram input'larını güncelle
+    updateTelegramInputs(colors);
     
     // Kartlar
     document.querySelectorAll('.card')
@@ -113,15 +126,32 @@ export default function ThemeToggle() {
     
     if (telegramToggle && telegramSection) {
       telegramToggle.addEventListener('change', () => {
-        telegramSection.style.display = telegramToggle.checked ? 'block' : 'none';
+        const isVisible = telegramToggle.checked;
+        telegramSection.style.display = isVisible ? 'block' : 'none';
+        
+        // Görünürlük değiştiğinde renkleri tekrar uygula
+        if (isVisible) {
+          const colors = isDarkMode ? THEME_COLORS.dark : THEME_COLORS.light;
+          updateTelegramInputs(colors);
+        }
       });
     }
+
+    // System theme değişikliğini dinle
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        setIsDarkMode(e.matches);
+        applyTheme(e.matches);
+      }
+    });
   }, []);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    applyTheme(!isDarkMode);
-    localStorage.setItem('theme', !isDarkMode ? 'dark' : 'light');
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    applyTheme(newDarkMode);
+    localStorage.setItem('theme', newDarkMode ? 'dark' : 'light');
   };
 
   const colors = isDarkMode ? THEME_COLORS.dark : THEME_COLORS.light;
