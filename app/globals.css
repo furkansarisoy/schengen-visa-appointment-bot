@@ -1,22 +1,52 @@
 :root {
-  --primary-color: #6366f1;
-  --primary-hover: #4f46e5;
+  /* Light theme variables */
+  --bg-color: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --card-bg: #ffffff;
+  --input-bg: #f8fafc;
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --toggle-bg: #e2e8f0;
+  --toggle-icon: #1e293b;
   --danger-color: #ef4444;
   --danger-hover: #dc2626;
   --success-color: #22c55e;
   --success-hover: #16a34a;
   --bg-gradient-from: #f8fafc;
   --bg-gradient-to: #e2e8f0;
-  --card-bg: #ffffff;
-  --text-dark: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --input-bg: #f8fafc;
 }
 
+[data-theme="dark"] {
+  /* Dark theme variables */
+  --bg-color: #111827;
+  --bg-secondary: #1f2937;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --card-bg: #1f2937;
+  --input-bg: #374151;
+  --primary-color: #3b82f6;
+  --primary-hover: #60a5fa;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --toggle-bg: #334155;
+  --toggle-icon: #f1f5f9;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --success-color: #22c55e;
+  --success-hover: #16a34a;
+  --bg-gradient-from: #1a1b1e;
+  --bg-gradient-to: #25262b;
+}
+
+/* Base styles */
 body {
-  background: linear-gradient(135deg, var(--bg-gradient-from) 0%, var(--bg-gradient-to) 100%);
-  color: var(--text-dark);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
@@ -36,7 +66,7 @@ body {
   align-items: center;
   gap: 0.75rem;
   letter-spacing: -0.025em;
-  color: var(--text-dark);
+  color: var(--text-primary);
 }
 
 .title i {
@@ -47,7 +77,7 @@ body {
 .version-badge {
   font-size: 0.75rem;
   background: var(--primary-color);
-  color: white;
+  color: var(--bg-color);
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   margin-left: auto;
@@ -59,7 +89,7 @@ body {
 .card {
   background-color: var(--card-bg);
   border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px var(--shadow-color);
   margin-bottom: 1.5rem;
   border: 1px solid var(--border-color);
 }
@@ -79,7 +109,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--text-dark);
+  color: var(--text-primary);
 }
 
 .card-title i {
@@ -103,7 +133,7 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: var(--text-dark);
+  color: var(--text-secondary);
   margin-left: 0.5rem;
 }
 
@@ -115,8 +145,8 @@ body {
 .form-group input,
 .form-group select {
   width: 100%;
-  background-color: white;
-  color: var(--text-dark);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid var(--border-color);
@@ -147,8 +177,8 @@ body {
 }
 
 .form-group select option {
-  color: var(--text-dark);
-  background-color: white;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
   padding: 0.5rem;
 }
 
@@ -166,7 +196,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--border-color);
+  background-color: var(--bg-secondary);
   transition: 0.3s ease;
   border-radius: 9999px;
 }
@@ -178,14 +208,14 @@ body {
   width: 1.25rem;
   left: 0.25rem;
   bottom: 0.25rem;
-  background-color: white;
+  background-color: var(--text-primary);
   transition: 0.3s ease;
   border-radius: 50%;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 input:checked + .toggle-slider {
-  background: var(--primary-color);
+  background-color: var(--primary-color);
 }
 
 input:checked + .toggle-slider:before {
@@ -265,7 +295,7 @@ input:checked + .toggle-slider:before {
 }
 
 .message {
-  background: white;
+  background-color: var(--card-bg);
   border-radius: 0.75rem;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -274,7 +304,7 @@ input:checked + .toggle-slider:before {
 
 .message-time {
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
@@ -332,4 +362,72 @@ input:checked + .toggle-slider:before {
   .card {
     margin-bottom: 1rem;
   }
+
+  .theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: var(--toggle-bg);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  background: var(--primary-color);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--toggle-icon);
+  transition: all 0.3s ease;
+}
+
+/* Hide/show icons based on theme */
+[data-theme="dark"] .theme-toggle .sun {
+  display: none;
+}
+
+[data-theme="light"] .theme-toggle .moon {
+  display: none;
+}
+
+/* Message styles */
+.message {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.message-time {
+  color: var(--text-secondary);
+}
+
+/* Version badge */
+.version-badge {
+  background: var(--primary-color);
+  color: var(--bg-color);
+}
+
+/* Toggle switch */
+.toggle-switch .toggle-slider {
+  background-color: var(--bg-secondary);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--primary-color);
 }
