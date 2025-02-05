@@ -1,20 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { playNotification } from '../public/notification';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { playNotification } from "../public/notification";
+import { months, countryTr, countries, citiesTR } from "./store/enums";
 
 export default function Home() {
-  const [botToken, setBotToken] = useState('');
-  const [chatId, setChatId] = useState('');
-  const [country, setCountry] = useState('France');
-  const [city, setCity] = useState('Ankara');
+  const [botToken, setBotToken] = useState("");
+  const [chatId, setChatId] = useState("");
+  const [country, setCountry] = useState("France");
+  const [city, setCity] = useState("Ankara");
   const [frequency, setFrequency] = useState(5);
   const [isChecking, setIsChecking] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [status, setStatus] = useState('Program bekleme durumunda...');
+  const [status, setStatus] = useState("Program bekleme durumunda...");
   const [useTelegram, setUseTelegram] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   // Mesaj alanı için ref oluşturuyoruz
   const messageHistoryRef = useRef(null);
@@ -22,7 +23,8 @@ export default function Home() {
   // Mesajlar değiştiğinde otomatik scroll
   useEffect(() => {
     if (messageHistoryRef.current) {
-      messageHistoryRef.current.scrollTop = messageHistoryRef.current.scrollHeight;
+      messageHistoryRef.current.scrollTop =
+        messageHistoryRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -31,118 +33,110 @@ export default function Home() {
       id: Date.now(),
       type,
       content,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString(),
     };
-    setMessages(prev => [...prev, newMessage].slice(-100));
+    setMessages((prev) => [...prev, newMessage].slice(-100));
   }, []);
 
   const stopChecking = useCallback(() => {
     setIsChecking(false);
-    setStatus('Program bekleme durumunda...');
+    setStatus("Program bekleme durumunda...");
   }, []);
 
-  const sendTelegramMessage = useCallback(async (message) => {
-    if (!useTelegram) return;
+  const sendTelegramMessage = useCallback(
+    async (message) => {
+      if (!useTelegram) return;
 
-    try {
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML'
-        })
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Telegram hatası: ${error.description || 'Bilinmeyen hata'}`);
+      try {
+        const response = await fetch(
+          `https://api.telegram.org/bot${botToken}/sendMessage`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: message,
+              parse_mode: "HTML",
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(
+            `Telegram hatası: ${error.description || "Bilinmeyen hata"}`
+          );
+        }
+      } catch (error) {
+        addMessage("error", `Telegram hatası: ${error.message}`);
+
+        if (error.message.includes("Telegram hatası")) {
+          stopChecking();
+          addMessage(
+            "error",
+            "Telegram hatası nedeniyle kontroller durduruldu. Lütfen bot token ve chat ID'nizi kontrol edin."
+          );
+        }
       }
-    } catch (error) {
-      addMessage('error', `Telegram hatası: ${error.message}`);
-      
-      if (error.message.includes('Telegram hatası')) {
-        stopChecking();
-        addMessage('error', 'Telegram hatası nedeniyle kontroller durduruldu. Lütfen bot token ve chat ID\'nizi kontrol edin.');
-      }
-    }
-  }, [botToken, chatId, addMessage, stopChecking, useTelegram]);
+    },
+    [botToken, chatId, addMessage, stopChecking, useTelegram]
+  );
 
   const formatDate = useCallback((dateStr) => {
     if (!dateStr) {
-      return 'Tarih bilgisi mevcut değil';
+      return "Tarih bilgisi mevcut değil";
     }
 
-    const months = {
-      '01': 'Ocak', '02': 'Şubat', '03': 'Mart', '04': 'Nisan',
-      '05': 'Mayıs', '06': 'Haziran', '07': 'Temmuz', '08': 'Ağustos',
-      '09': 'Eylül', '10': 'Ekim', '11': 'Kasım', '12': 'Aralık'
-    };
-
     try {
-      const [year, month, day] = dateStr.split('-');
+      const [year, month, day] = dateStr.split("-");
       if (!year || !month || !day || !months[month]) {
-        throw new Error('Geçersiz tarih formatı');
+        throw new Error("Geçersiz tarih formatı");
       }
       return `${day} ${months[month]} ${year}`;
     } catch (error) {
-      return 'Geçersiz tarih formatı';
+      return "Geçersiz tarih formatı";
     }
   }, []);
 
-  const formatAppointmentMessage = useCallback((appointments) => {
-    const countryTr = {
-      'France': 'Fransa',
-      'Netherlands': 'Hollanda',
-      'Ireland': 'İrlanda',
-      'Malta': 'Malta',
-      'Sweden': 'İsveç',
-      'Czechia': 'Çekya',
-      'Croatia': 'Hırvatistan',
-      'Bulgaria': 'Bulgaristan',
-      'Finland': 'Finlandiya',
-      'Slovenia': 'Slovenya',
-      'Denmark': 'Danimarka',
-      'Norway': 'Norveç',
-      'Estonia': 'Estonya',
-      'Lithuania': 'Litvanya',
-      'Luxembourg': 'Lüksemburg',
-      'Ukraine': 'Ukrayna',
-      'Latvia': 'Letonya'
-    };
+  const formatAppointmentMessage = useCallback(
+    (appointments) => {
+      // Tarihi geçerli olan randevuları filtrele
+      const validAppointments = appointments.filter((appt) => {
+        if (!appt.appointment_date) return false;
+        try {
+          const [year, month, day] = appt.appointment_date.split("-");
+          return (
+            year && month && day && !isNaN(Date.parse(appt.appointment_date))
+          );
+        } catch {
+          return false;
+        }
+      });
 
-    // Tarihi geçerli olan randevuları filtrele
-    const validAppointments = appointments.filter(appt => {
-      if (!appt.appointment_date) return false;
-      try {
-        const [year, month, day] = appt.appointment_date.split('-');
-        return year && month && day && !isNaN(Date.parse(appt.appointment_date));
-      } catch {
-        return false;
-      }
-    });
+      if (validAppointments.length === 0) return null;
 
-    if (validAppointments.length === 0) return null;
+      let message = `🎉 ${
+        countryTr[country] || country
+      } için randevu bulundu!\n\n`;
+      validAppointments.forEach((appt, index) => {
+        if (index > 0) message += "\n----------------------------\n\n";
+        message += `📅 RANDEVU TARİHİ: ${formatDate(appt.appointment_date)}\n`;
+        message += `🏢 Merkez: ${appt.center_name || "Belirtilmemiş"}\n`;
+        message += `📋 Kategori: ${appt.visa_category || "Belirtilmemiş"}\n`;
+        if (appt.visa_subcategory) {
+          message += `📝 Alt Kategori: ${appt.visa_subcategory}\n`;
+        }
+        const link = appt.book_now_link || "Link mevcut değil";
+        message += `\n🔗 <a href="${link}" target="_blank" rel="noopener noreferrer">Randevu almak için tıklayın</a>\n`;
+      });
+      return message;
+    },
+    [country, formatDate]
+  );
 
-    let message = `🎉 ${countryTr[country] || country} için randevu bulundu!\n\n`;
-    validAppointments.forEach((appt, index) => {
-      if (index > 0) message += '\n----------------------------\n\n';
-      message += `📅 RANDEVU TARİHİ: ${formatDate(appt.appointment_date)}\n`;
-      message += `🏢 Merkez: ${appt.center_name || 'Belirtilmemiş'}\n`;
-      message += `📋 Kategori: ${appt.visa_category || 'Belirtilmemiş'}\n`;
-      if (appt.visa_subcategory) {
-        message += `📝 Alt Kategori: ${appt.visa_subcategory}\n`;
-      }
-      const link = appt.book_now_link || 'Link mevcut değil';
-      message += `\n🔗 <a href="${link}" target="_blank" rel="noopener noreferrer">Randevu almak için tıklayın</a>\n`;
-    });
-    return message;
-  }, [country, formatDate]);
-
-  const showWebNotification = useCallback((message, type = 'success') => {
+  const showWebNotification = useCallback((message, type = "success") => {
     setNotificationMessage(message);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 5000);
@@ -150,32 +144,43 @@ export default function Home() {
 
   const checkAppointments = useCallback(async () => {
     try {
-      const response = await fetch('https://api.schengenvisaappointments.com/api/visa-list/?format=json', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        "https://api.schengenvisaappointments.com/api/visa-list/?format=json",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error(`API yanıt vermedi (${response.status}): ${response.statusText}`);
+        throw new Error(
+          `API yanıt vermedi (${response.status}): ${response.statusText}`
+        );
       }
 
       const appointments = await response.json();
-      
+
       if (!Array.isArray(appointments)) {
-        throw new Error('API yanıtı beklenen formatta değil');
+        throw new Error("API yanıtı beklenen formatta değil");
       }
-      
-      const availableAppointments = appointments.filter(appointment => {
-        if (!appointment.source_country || !appointment.mission_country || !appointment.center_name) {
+
+      const availableAppointments = appointments.filter((appointment) => {
+        if (
+          !appointment.source_country ||
+          !appointment.mission_country ||
+          !appointment.center_name
+        ) {
           return false;
         }
 
-        return appointment.source_country === 'Turkiye' &&
+        return (
+          appointment.source_country === "Turkiye" &&
           appointment.mission_country.toLowerCase() === country.toLowerCase() &&
-          appointment.center_name.toLowerCase().includes(city.toLowerCase());
+          appointment.center_name.toLowerCase().includes(city.toLowerCase())
+        );
       });
 
       if (availableAppointments.length > 0) {
@@ -183,45 +188,69 @@ export default function Home() {
         if (useTelegram) {
           await sendTelegramMessage(message);
         }
-        addMessage('appointment', message);
+        addMessage("appointment", message);
         showWebNotification(message);
-        
+
         try {
           await playNotification();
         } catch (error) {
-          addMessage('error', 'Ses bildirimi çalınamadı');
+          addMessage("error", "Ses bildirimi çalınamadı");
         }
       } else {
         const statusMessage = `Kontrol edildi: ${country} - ${city} (Randevu bulunamadı)`;
-        addMessage('status', statusMessage);
-        showWebNotification(statusMessage, 'info');
+        addMessage("status", statusMessage);
+        showWebNotification(statusMessage, "info");
       }
     } catch (error) {
-      addMessage('error', `Hata: ${error.message}`);
-      showWebNotification(error.message, 'error');
-      
-      if (error.message.includes('API yanıt vermedi')) {
+      addMessage("error", `Hata: ${error.message}`);
+      showWebNotification(error.message, "error");
+
+      if (error.message.includes("API yanıt vermedi")) {
         stopChecking();
-        addMessage('error', 'API hatası nedeniyle kontroller durduruldu. Lütfen daha sonra tekrar deneyin.');
+        addMessage(
+          "error",
+          "API hatası nedeniyle kontroller durduruldu. Lütfen daha sonra tekrar deneyin."
+        );
       }
     }
-  }, [country, city, formatAppointmentMessage, sendTelegramMessage, addMessage, stopChecking, useTelegram, showWebNotification]);
+  }, [
+    country,
+    city,
+    formatAppointmentMessage,
+    sendTelegramMessage,
+    addMessage,
+    stopChecking,
+    useTelegram,
+    showWebNotification,
+  ]);
 
   const startChecking = useCallback(() => {
     if (useTelegram && (!botToken || !chatId)) {
-      addMessage('error', 'Telegram bildirimleri açıkken bot token ve chat ID zorunludur!');
+      addMessage(
+        "error",
+        "Telegram bildirimleri açıkken bot token ve chat ID zorunludur!"
+      );
       return;
     }
-    
+
     if (frequency < 1 || frequency > 60) {
-      addMessage('error', 'Kontrol sıklığı 1-60 dakika arasında olmalıdır!');
+      addMessage("error", "Kontrol sıklığı 1-60 dakika arasında olmalıdır!");
       return;
     }
 
     setIsChecking(true);
     setStatus(`${country} - ${city} için randevu kontrolü başlatıldı`);
     checkAppointments();
-  }, [botToken, chatId, country, city, frequency, checkAppointments, addMessage, useTelegram]);
+  }, [
+    botToken,
+    chatId,
+    country,
+    city,
+    frequency,
+    checkAppointments,
+    addMessage,
+    useTelegram,
+  ]);
 
   useEffect(() => {
     let interval;
@@ -255,11 +284,17 @@ export default function Home() {
                   setUseTelegram(e.target.checked);
                   if (!e.target.checked && isChecking) {
                     stopChecking();
-                    addMessage('status', 'Telegram bildirimleri kapatıldığı için kontrol durduruldu.');
+                    addMessage(
+                      "status",
+                      "Telegram bildirimleri kapatıldığı için kontrol durduruldu."
+                    );
                   }
                 }}
               />
-              <label htmlFor="telegram-toggle" className="toggle-slider"></label>
+              <label
+                htmlFor="telegram-toggle"
+                className="toggle-slider"
+              ></label>
             </div>
           </h2>
 
@@ -309,30 +344,26 @@ export default function Home() {
                 <i className="fas fa-globe"></i>
                 Ülke
               </label>
-              <select value={country} onChange={(e) => {
-                setCountry(e.target.value);
-                if (isChecking) {
-                  stopChecking();
-                  addMessage('status', 'Ülke değiştirildiği için kontrol durduruldu.');
-                }
-              }}>
-                <option value="France">Fransa 🇫🇷</option>
-                <option value="Netherlands">Hollanda 🇳🇱</option>
-                <option value="Ireland">İrlanda 🇮🇪</option>
-                <option value="Malta">Malta 🇲🇹</option>
-                <option value="Sweden">İsveç 🇸🇪</option>
-                <option value="Czechia">Çekya 🇨🇿</option>
-                <option value="Croatia">Hırvatistan 🇭🇷</option>
-                <option value="Bulgaria">Bulgaristan 🇧🇬</option>
-                <option value="Finland">Finlandiya 🇫🇮</option>
-                <option value="Slovenia">Slovenya 🇸🇮</option>
-                <option value="Denmark">Danimarka 🇩🇰</option>
-                <option value="Norway">Norveç 🇳🇴</option>
-                <option value="Estonia">Estonya 🇪🇪</option>
-                <option value="Lithuania">Litvanya 🇱🇹</option>
-                <option value="Luxembourg">Lüksemburg 🇱🇺</option>
-                <option value="Ukraine">Ukrayna 🇺🇦</option>
-                <option value="Latvia">Letonya 🇱🇻</option>
+              <select
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  if (isChecking) {
+                    stopChecking();
+                    addMessage(
+                      "status",
+                      "Ülke değiştirildiği için kontrol durduruldu."
+                    );
+                  }
+                }}
+              >
+                {countries.map((item, index) => {
+                  return (
+                    <option key={index} value={item?.value}>
+                      {item?.label}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -341,20 +372,22 @@ export default function Home() {
                 <i className="fas fa-city"></i>
                 Şehir
               </label>
-              <select value={city} onChange={(e) => {
-                setCity(e.target.value);
-                if (isChecking) {
-                  stopChecking();
-                  addMessage('status', 'Şehir değiştirildiği için kontrol durduruldu.');
-                }
-              }}>
-                <option value="Ankara">Ankara</option>
-                <option value="Istanbul">İstanbul</option>
-                <option value="Izmir">İzmir</option>
-                <option value="Antalya">Antalya</option>
-                <option value="Bursa">Bursa</option>
-                <option value="Edirne">Edirne</option>
-                <option value="Gaziantep">Gaziantep</option>
+              <select
+                value={city}
+                onChange={(e) => {
+                  setCity(e.target.value);
+                  if (isChecking) {
+                    stopChecking();
+                    addMessage(
+                      "status",
+                      "Şehir değiştirildiği için kontrol durduruldu."
+                    );
+                  }
+                }}
+              >
+                {citiesTR.map((item, index) => {
+                  return <option key={index} value={item?.value}>{item?.label}</option>;
+                })}
               </select>
             </div>
 
@@ -370,7 +403,10 @@ export default function Home() {
                   setFrequency(parseInt(e.target.value));
                   if (isChecking) {
                     stopChecking();
-                    addMessage('status', 'Kontrol sıklığı değiştirildiği için kontrol durduruldu.');
+                    addMessage(
+                      "status",
+                      "Kontrol sıklığı değiştirildiği için kontrol durduruldu."
+                    );
                   }
                 }}
                 min="1"
@@ -384,19 +420,22 @@ export default function Home() {
       <div className="control-section">
         <div className="button-group">
           <button
-            className={`btn ${isChecking ? 'btn-danger' : 'btn-primary'} ${
-              isChecking ? '' : 'btn-disabled'
+            className={`btn ${isChecking ? "btn-danger" : "btn-primary"} ${
+              isChecking ? "" : "btn-disabled"
             }`}
             onClick={isChecking ? stopChecking : startChecking}
           >
-            <i className={`fas ${isChecking ? 'fa-stop' : 'fa-play'}`}></i>
-            {isChecking ? 'Kontrolü Durdur' : 'Kontrolü Başlat'}
+            <i className={`fas ${isChecking ? "fa-stop" : "fa-play"}`}></i>
+            {isChecking ? "Kontrolü Durdur" : "Kontrolü Başlat"}
           </button>
         </div>
 
-        <div className={`status ${isChecking ? 'running' : 'stopped'}`} id='status-container'>
-          <i className="fas fa-info-circle" id='status-icon'></i>
-          <p id='status-text'>{status}</p>
+        <div
+          className={`status ${isChecking ? "running" : "stopped"}`}
+          id="status-container"
+        >
+          <i className="fas fa-info-circle" id="status-icon"></i>
+          <p id="status-text">{status}</p>
         </div>
       </div>
 
@@ -405,17 +444,20 @@ export default function Home() {
           <h2 className="card-title">
             <div className="card-title-text">
               <i className="fas fa-history"></i>
-              {useTelegram ? 'Telegram Mesaj Geçmişi' : 'Bulunan Randevular'}
+              {useTelegram ? "Telegram Mesaj Geçmişi" : "Bulunan Randevular"}
             </div>
           </h2>
           <div className="message-history" ref={messageHistoryRef}>
-            {messages.slice().map(message => (
+            {messages.slice().map((message) => (
               <div key={message.id} className={`message ${message.type}`}>
                 <div className="message-time">
                   <i className="fas fa-clock"></i>
                   {message.timestamp}
                 </div>
-                <div className="message-content" dangerouslySetInnerHTML={{ __html: message.content }}></div>
+                <div
+                  className="message-content"
+                  dangerouslySetInnerHTML={{ __html: message.content }}
+                ></div>
               </div>
             ))}
           </div>
@@ -434,4 +476,4 @@ export default function Home() {
       )}
     </div>
   );
-} 
+}

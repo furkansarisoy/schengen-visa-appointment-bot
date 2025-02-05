@@ -1,17 +1,18 @@
-import './globals.css';
-import ThemeToggle from './components/ThemeToggle';
+import "./globals.css";
+import ThemeToggle from "./components/ThemeToggle";
 
 export const metadata = {
-  title: 'Schengen Vizesi Randevu Arama',
-  description: 'Modern web arayüzlü, gerçek zamanlı bildirim sistemine sahip Schengen vize randevu kontrol uygulaması.',
+  title: "Schengen Vizesi Randevu Arama",
+  description:
+    "Modern web arayüzlü, gerçek zamanlı bildirim sistemine sahip Schengen vize randevu kontrol uygulaması.",
   icons: {
     icon: [
       {
-        url: '/schengen-visa-appointment/favicon.ico',
-        sizes: 'any'
-      }
-    ]
-  }
+        url: "/schengen-visa-appointment/favicon.ico",
+        sizes: "any",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -40,10 +41,10 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning={true}>
         <ThemeToggle />
         {children}
       </body>
     </html>
   );
-} 
+}
