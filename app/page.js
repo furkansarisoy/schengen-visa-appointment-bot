@@ -197,7 +197,9 @@ export default function Home() {
           addMessage("error", "Ses bildirimi çalınamadı");
         }
       } else {
-        const statusMessage = `Kontrol edildi: ${country} - ${city} (Randevu bulunamadı)`;
+        const statusMessage = `Kontrol edildi: ${
+          countryTr[country] || country
+        } - ${city} (Randevu bulunamadı)`;
         addMessage("status", statusMessage);
         showWebNotification(statusMessage, "info");
       }
@@ -386,7 +388,11 @@ export default function Home() {
                 }}
               >
                 {citiesTR.map((item, index) => {
-                  return <option key={index} value={item?.value}>{item?.label}</option>;
+                  return (
+                    <option key={index} value={item?.value}>
+                      {item?.label}
+                    </option>
+                  );
                 })}
               </select>
             </div>
