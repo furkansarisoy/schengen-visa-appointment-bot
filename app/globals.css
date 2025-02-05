@@ -1,6 +1,7 @@
 :root {
   /* Light theme variables */
   --bg-color: #ffffff;
+  --bg-toggle-light: #9b9da0;
   --bg-secondary: #f8fafc;
   --text-primary: #1e293b;
   --text-secondary: #64748b;
@@ -425,7 +426,7 @@ input:checked + .toggle-slider:before {
 
 /* Toggle switch */
 .toggle-switch .toggle-slider {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-toggle-light);
 }
 
 .toggle-switch input:checked + .toggle-slider {

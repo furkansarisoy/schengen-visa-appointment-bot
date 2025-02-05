@@ -155,7 +155,7 @@ export default function Home() {
         }
       );
 
-      if (!response.ok) {
+      if (!response.ok || response?.length <= 0) {
         throw new Error(
           `API yanıt vermedi (${response.status}): ${response.statusText}`
         );
@@ -282,6 +282,7 @@ export default function Home() {
                 type="checkbox"
                 id="telegram-toggle"
                 checked={useTelegram}
+                style={{backgroundColor: "lightgray"}}
                 onChange={(e) => {
                   setUseTelegram(e.target.checked);
                   if (!e.target.checked && isChecking) {
